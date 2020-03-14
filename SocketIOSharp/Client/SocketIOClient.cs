@@ -6,8 +6,8 @@ namespace SocketIOSharp.Client
 {
     public partial class SocketIOClient : IDisposable
     {
+        private readonly ConnctionData ConnectionInformation = new ConnctionData();
         private WebSocket Client = null;
-        private ConnctionData ConnectionInformation = new ConnctionData();
 
         public bool JsonOnly { get; set; }
         public bool AutoReconnect { get; set; }
@@ -34,10 +34,10 @@ namespace SocketIOSharp.Client
 
         public SocketIOClient(SocketIOClient.Scheme Scheme, string Host, int Port, bool JsonOnly = false, bool AutoReconnect = false, bool UseAckTimeout = false)
         {
-            init(Scheme, Host, Port, JsonOnly, AutoReconnect, UseAckTimeout);
+            Initialize(Scheme, Host, Port, JsonOnly, AutoReconnect, UseAckTimeout);
         }
 
-        private void init(SocketIOClient.Scheme Scheme, string Host, int Port, bool JsonOnly, bool AutoReconnect, bool UseAckTimeout)
+        private void Initialize(SocketIOClient.Scheme Scheme, string Host, int Port, bool JsonOnly, bool AutoReconnect, bool UseAckTimeout)
         {
             string URIString = string.Format("{0}://{1}:{2}/socket.io/?EIO=4&transport=websocket", Scheme, Host, Port);
 
@@ -60,7 +60,7 @@ namespace SocketIOSharp.Client
         public void Connect()
         {
             if (this.Client == null)
-                init(this.ConnectionInformation.Scheme, this.ConnectionInformation.Host, this.ConnectionInformation.Port, this.JsonOnly, this.AutoReconnect, this.UseAckTimeout);
+                Initialize(this.ConnectionInformation.Scheme, this.ConnectionInformation.Host, this.ConnectionInformation.Port, this.JsonOnly, this.AutoReconnect, this.UseAckTimeout);
             this.Client.Connect();
         }
 

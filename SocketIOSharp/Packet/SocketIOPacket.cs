@@ -82,7 +82,7 @@ namespace SocketIOSharp.Packet
                 String.Append(string.Format(", JsonData={0}", JsonData));
 
             if (BinaryData != null)
-                String.Append(string.Format(", BinaryData={6}", BitConverter.ToString(BinaryData)));
+                String.Append(string.Format(", BinaryData={0}", BitConverter.ToString(BinaryData)));
 
             return String.ToString();
         }
