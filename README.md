@@ -163,8 +163,8 @@ client.Emit("Event with data and ack, action as method", 42, Console.WriteLine);
 Welcome to report issue or create pull request. I will check it happily.
 
 # Dependencies
-- [WebSocketSharp](https://github.com/sta/websocket-sharp)
-- [Newtonsoft.Json](https://github.com/JamesNK/Newtonsoft.Json)
+- [WebSocketSharp v1.0.3-rc11](https://github.com/sta/websocket-sharp)
+- [Newtonsoft.Json v12.0.3](https://github.com/JamesNK/Newtonsoft.Json)
 
 # License
 `SocketIOSharp` is under [The MIT License](https://github.com/uhm0311/SocketIOSharp/blob/master/LICENSE).
