@@ -2,7 +2,9 @@
 `SocketIOSharp` is a **Socket.IO protocol revision `4` client** library based on `Engine.IO` and `WebSocket` protocol. It depends on [WebSocketSharp](https://github.com/sta/websocket-sharp) to use `WebSocket` protocol. `Engine.IO` protocol is partly implemented by itself.
 
 # Installation
+- [Nuget gallery](https://www.nuget.org/packages/SocketIOSharp)
 
+`PM> Install-Package SocketIOSharp`
 
 # Usage
 ## Namespace ##
