@@ -3,8 +3,7 @@
 
 # Installation
 - [Nuget gallery](https://www.nuget.org/packages/SocketIOSharp)
-
-`PM> Install-Package SocketIOSharp`
+- Command `Install-Package SocketIOSharp` in nuget package manager console.
 
 # Usage
 ## Namespace ##
