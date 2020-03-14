@@ -5,7 +5,7 @@
 
 
 # Usage
-See [USAGE.md](https://github.com/uhm0311/SocketIOSharp/blob/master/README_USAGE.md) for details.
+See [README_USAGE.md](https://github.com/uhm0311/SocketIOSharp/blob/master/README_USAGE.md) for details.
 
 # Implemented features
 - Fully implemented `Socket.IO` protocol includes `hartbeat`. See [Socket.IO protocol specifications](https://github.com/socketio/socket.io-protocol) for details.
