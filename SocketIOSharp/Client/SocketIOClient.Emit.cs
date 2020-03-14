@@ -46,7 +46,8 @@ namespace SocketIOSharp.Client
                 JsonArray.Add(Event);
                 for (int i = 0; i < ArgumentsCount; i++)
                 {
-                    JToken Data = null;
+                    JToken Data;
+
                     try { Data = JToken.FromObject(Arguments[i]); }
                     catch { Data = JValue.CreateNull(); }
 

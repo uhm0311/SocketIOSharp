@@ -30,8 +30,7 @@ namespace SocketIOSharp.Packet.Binary.Constructors
         {
             if (ConstructeeTokenCount > 0)
             {
-                object Key = null;
-                JToken Parent = base.DequeueConstructeeTokenParent(out Key);
+                JToken Parent = base.DequeueConstructeeTokenParent(out object Key);
                 base.ConstructeePacket.Attachments.Dequeue();
 
                 Parent[Key] = BinaryData;

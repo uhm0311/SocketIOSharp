@@ -36,13 +36,14 @@ namespace SocketIOSharp.Packet.Binary.Constructors
             int PlaceholderIndex = 0;
             while (ConstructeeTokenCount > 0)
             {
-                object Key;
-                JToken Parent = base.DequeueConstructeeTokenParent(out Key);
+                JToken Parent = base.DequeueConstructeeTokenParent(out object Key);
                 base.ConstructeePacket.Attachments.Enqueue(SocketIOPacket.Decode(EngineIOPacketType.MESSAGE, (byte[])Parent[Key]));
 
-                Parent[Key] = new JObject();
-                Parent[Key][PLACEHOLDER] = true;
-                Parent[Key][NUM] = PlaceholderIndex++;
+                Parent[Key] = new JObject
+                {
+                    [PLACEHOLDER] = true,
+                    [NUM] = PlaceholderIndex++
+                };
             }
 
             return base.ConstructeePacket;

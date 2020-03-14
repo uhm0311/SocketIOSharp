@@ -10,9 +10,9 @@ namespace SocketIOSharp.Client
 {
     partial class SocketIOClient
     {
-        private Reconstructor Reconstructor = new Reconstructor();
-        private ConcurrentDictionary<JToken, List<Action<JToken[]>>> EventHandlers = new ConcurrentDictionary<JToken, List<Action<JToken[]>>>();
-        private ConcurrentDictionary<JToken, List<Action<JToken[], Action<JToken[]>>>> AckHandlers = new ConcurrentDictionary<JToken, List<Action<JToken[], Action<JToken[]>>>>();
+        private readonly Reconstructor Reconstructor = new Reconstructor();
+        private readonly ConcurrentDictionary<JToken, List<Action<JToken[]>>> EventHandlers = new ConcurrentDictionary<JToken, List<Action<JToken[]>>>();
+        private readonly ConcurrentDictionary<JToken, List<Action<JToken[], Action<JToken[]>>>> AckHandlers = new ConcurrentDictionary<JToken, List<Action<JToken[], Action<JToken[]>>>>();
 
         private void HandleSocketPacket(SocketIOPacket Packet, bool IsBinary)
         {

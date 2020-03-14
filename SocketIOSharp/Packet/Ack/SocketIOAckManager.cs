@@ -7,14 +7,14 @@ namespace SocketIOSharp.Packet.Ack
 {
     internal class SocketIOAckManager
     {
-        private Timer AckTimer = new Timer() { AutoReset = true };
+        private readonly Timer AckTimer = new Timer() { AutoReset = true };
 
         public bool UseAckTimeout { get; private set; }
         public const int MinTimeout = 10;
         private double TimeoutInMillis = 60 * 1000;
 
-        private List<SocketIOAck> AckList = new List<SocketIOAck>();
-        private object AckMutex = new object();
+        private readonly List<SocketIOAck> AckList = new List<SocketIOAck>();
+        private readonly object AckMutex = new object();
         public bool AutoRemove { get; set; }
 
         public SocketIOAckManager()
