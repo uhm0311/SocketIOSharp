@@ -9,21 +9,22 @@
 	<Authors>uhm0311</Authors>
 	<Company>uhm0311</Company>
 	<Title>Socket.IO</Title>
-	<NeutralLanguage>en-US</NeutralLanguage>
-	<Version>1.0.0</Version>
 	<Copyright>Copyright (c) 2016-2020 uhm0311</Copyright>
 	<Description>C# implementation of Socket.IO protocol client.</Description>
-	<Summary>C# implementation of Socket.IO protocol client.</Summary>
 	<PackageId>SocketIOSharp</PackageId>
     <PackageTags>Socket.IO;SocketIO</PackageTags>
     <PackageProjectUrl>https://github.com/uhm0311/SocketIOSharp</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
 	<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-	  <RepositoryType>git</RepositoryType>
-	  <RepositoryUrl>https://github.com/uhm0311/SocketIOSharp.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/uhm0311/SocketIOSharp.git</RepositoryUrl>
+	<PackageIcon>icon.png</PackageIcon>
+	<PackageVersion>1.0.0.1</PackageVersion>
+	<PackageReleaseNotes>First release.</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
 	<PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
 	<PackageReference Include="WebSocketSharp" Version="1.0.3-rc11" />
+	<None Include="..\icon.png" Pack="true" PackagePath="\"/>
   </ItemGroup>
 </Project>
