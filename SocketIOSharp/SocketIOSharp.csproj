@@ -20,8 +20,8 @@
     <RepositoryUrl>https://github.com/uhm0311/SocketIOSharp.git</RepositoryUrl>
   <PackageIcon>icon.png</PackageIcon>
   <MinClientVersion>2.12</MinClientVersion>
-  <PackageVersion>1.0.1</PackageVersion>
-  <PackageReleaseNotes>Add support to .NETFramework v4.0 and .NETStandard v2.0</PackageReleaseNotes>
+  <PackageVersion>1.0.2</PackageVersion>
+  <PackageReleaseNotes>Fix bug from critical misunderstanding of ping timeout.</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetFramework)'=='net45' OR '$(TargetFramework)'=='net40'">
     <PackageReference Include="WebSocketSharp-NonPreRelease" Version="1.0.0" />
