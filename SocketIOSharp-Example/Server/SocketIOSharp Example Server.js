@@ -20,6 +20,12 @@ server.listen(port, function () {
 			
 			socket.emit('echo', input);
 		});
+
+		socket.on('input array', function (input1, input2) {
+			console.log('Client : ' + input1 + ', ' + input2);
+
+			socket.emit('echo array', input1, input2);
+		});
 		
 		socket.on('disconnect', function () {
 			console.log('Client disconnected!');

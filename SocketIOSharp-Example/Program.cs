@@ -21,6 +21,7 @@ namespace SocketIOSharp.Example
             while (!(line = Console.ReadLine()).Equals("/exit"))
             {
                 client.Emit("input", line);
+                client.Emit("input array", line, line);
             }
 
             client.Close();
@@ -45,6 +46,12 @@ namespace SocketIOSharp.Example
             client.On("echo", (Data) =>
             {
                 Console.WriteLine("Echo : " + Data[0]);
+            });
+
+            client.On("echo array", (Data) =>
+            {
+                Console.WriteLine("Echo1 : " + Data[0]);
+                Console.WriteLine("Echo2 : " + Data[1]);
             });
         }
     }

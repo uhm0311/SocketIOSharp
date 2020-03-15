@@ -58,8 +58,9 @@
       <Name>SocketIOSharp</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
-    <Folder Include="Server\" />
+    <Content Include="Server\SocketIOSharp Example Server.js" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
