@@ -29,22 +29,24 @@ namespace SocketIOSharp.Packet.Binary.Constructors
             if (ConstructeePacket != null)
             {
                 this.ConstructeePacket = ConstructeePacket;
-                this.OriginalPacket = ConstructeePacket.DeepClone();
+                OriginalPacket = ConstructeePacket.DeepClone();
             }
         }
 
-        protected void DFS(JToken JsonData, params Tuple<Condition, Action<JToken>>[] ConditionActions)
+        protected void DFS(JToken JsonData, params Tuple<Condition, ConstructorAction>[] ConditionActions)
         {
             if (JsonData != null)
             {
                 if (ConditionActions != null)
                 {
-                    foreach (Tuple<Condition, Action<JToken>> ConditionAction in ConditionActions)
+                    foreach (Tuple<Condition, ConstructorAction> ConditionAction in ConditionActions)
                     {
                         if (ConditionAction != null)
                         {
                             if (ConditionAction.Item1(JsonData))
+                            {
                                 ConditionAction.Item2(JsonData);
+                            }
                         }
                     }
                 }
@@ -52,7 +54,9 @@ namespace SocketIOSharp.Packet.Binary.Constructors
                 if (JsonData.HasValues)
                 {
                     for (JToken Child = JsonData.First; Child != null; Child = Child.Next)
+                    {
                         DFS(Child, ConditionActions);
+                    }
                 }
             }
         }
@@ -65,30 +69,46 @@ namespace SocketIOSharp.Packet.Binary.Constructors
                 JToken ConstructeeTokenParent = ConstructeeToken.Parent;
 
                 while (ConstructeeTokenParent.Parent != null && ConstructeeTokenParent.Type == JTokenType.Property)
+                {
                     ConstructeeTokenParent = ConstructeeTokenParent.Parent;
+                }
 
                 string ConstructeeTokenPath = ConstructeeToken.Path;
                 string ConstructeeTokenParentPath = ConstructeeTokenParent.Path;
 
                 int ConstructeeTokenParentPathLength = ConstructeeTokenParentPath.Length;
                 if (ConstructeeTokenParentPathLength > 0)
+                {
                     ConstructeeTokenParentPathLength++;
+                }
 
                 ConstructeeTokenParent = ConstructeePacket.JsonData.SelectToken(ConstructeeTokenParentPath);
                 string ConstructeeTokenRelativePath = ConstructeeTokenPath.Substring(ConstructeeTokenParentPathLength);
 
                 if (ConstructeeTokenRelativePath.StartsWith("[") && ConstructeeTokenRelativePath.EndsWith("]"))
+                {
                     ConstructeeTokenRelativePath = ConstructeeTokenRelativePath.Substring(1).Substring(0, ConstructeeTokenRelativePath.Length - 2);
+                }
 
                 if (ConstructeeTokenParent.Type == JTokenType.Array)
+                {
                     ConstructeeTokenKey = int.Parse(ConstructeeTokenRelativePath);
+                }
                 else if (ConstructeeTokenParent.Type == JTokenType.Object)
+                {
                     ConstructeeTokenKey = ConstructeeTokenRelativePath;
-                else throw new SocketIOClientException("Invalid placeholder parent type: " + ConstructeeTokenParent.Type);
+                }
+                else
+                {
+                    throw new SocketIOClientException("Invalid placeholder parent type: " + ConstructeeTokenParent.Type);
+                }
 
                 return ConstructeeTokenParent;
             }
-            else return (JToken)(ConstructeeTokenKey = null);
+            else
+            {
+                return (JToken)(ConstructeeTokenKey = null);
+            }
         }
 
         protected bool IsPlaceholder(JToken JsonData)
@@ -102,12 +122,20 @@ namespace SocketIOSharp.Packet.Binary.Constructors
 
         protected bool IsBytes(JToken JsonData)
         {
-            return (JsonData.Type == JTokenType.Bytes);
+            return JsonData.Type == JTokenType.Bytes;
         }
 
         public override string ToString()
         {
-            return string.Format("Packet={0}, OriginalPacket={1}, TokenQueue.Count={2}", ConstructeePacket, OriginalPacket, ConstructeeTokens.Count);
+            return string.Format
+            (
+                "Packet={0}, OriginalPacket={1}, TokenQueue.Count={2}", 
+                ConstructeePacket, 
+                OriginalPacket, 
+                ConstructeeTokens.Count
+            );
         }
+
+        protected delegate void ConstructorAction(JToken Data);
     }
 }

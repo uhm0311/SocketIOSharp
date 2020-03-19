@@ -1,4 +1,5 @@
-﻿using SocketIOSharp.Packet.Ack;
+﻿using Newtonsoft.Json.Linq;
+using SocketIOSharp.Packet.Ack;
 using System;
 using WebSocketSharp;
 
@@ -9,83 +10,114 @@ namespace SocketIOSharp.Client
         private readonly ConnctionData ConnectionInformation = new ConnctionData();
         private WebSocket Client = null;
 
+        public string URI
+        {
+            get
+            {
+                return string.Format
+                (
+                    "{0}://{1}:{2}/socket.io/?EIO=4&transport=websocket", 
+                    ConnectionInformation.Scheme, 
+                    ConnectionInformation.Host, 
+                    ConnectionInformation.Port
+                );
+            }
+        }
+
         public bool JsonOnly { get; set; }
         public bool AutoReconnect { get; set; }
+
+        public bool IsAlive
+        {
+            get
+            {
+                return Client?.IsAlive ?? false;
+            }
+        }
 
         private SocketIOAckManager AckManager = null;
         public bool UseAckTimeout 
         {
             get 
             {
-                if (AckManager != null)
-                    return AckManager.UseAckTimeout;
-                else return false;
+                return AckManager?.UseAckTimeout ?? false;
             }
             set 
             {
                 if (AckManager == null)
+                {
                     AckManager = new SocketIOAckManager() { AutoRemove = true };
+                }
 
                 if (value)
+                {
                     AckManager.StartTimer();
-                else AckManager.StopTimer();
+                }
+                else
+                {
+                    AckManager.StopTimer();
+                }
             }
         }
 
-        public SocketIOClient(SocketIOClient.Scheme Scheme, string Host, int Port, bool JsonOnly = false, bool AutoReconnect = false, bool UseAckTimeout = false)
+        public SocketIOClient(Scheme Scheme, string Host, int Port, bool JsonOnly = false, bool AutoReconnect = false, bool UseAckTimeout = false)
         {
             Initialize(Scheme, Host, Port, JsonOnly, AutoReconnect, UseAckTimeout);
         }
 
-        private void Initialize(SocketIOClient.Scheme Scheme, string Host, int Port, bool JsonOnly, bool AutoReconnect, bool UseAckTimeout)
+        private void Initialize(Scheme Scheme, string Host, int Port, bool JsonOnly, bool AutoReconnect, bool UseAckTimeout)
         {
-            string URIString = string.Format("{0}://{1}:{2}/socket.io/?EIO=4&transport=websocket", Scheme, Host, Port);
-
-            this.Client = new WebSocket(URIString);
-
-            this.Client.OnOpen += OnWebsocketOpen;
-            this.Client.OnClose += OnWebsocketClose;
-            this.Client.OnMessage += OnWebsocketMessage;
-            this.Client.OnError += OnWebsocketError;
-
-            this.ConnectionInformation.Scheme = Scheme;
-            this.ConnectionInformation.Host = Host;
-            this.ConnectionInformation.Port = Port;
+            ConnectionInformation.Scheme = Scheme;
+            ConnectionInformation.Host = Host;
+            ConnectionInformation.Port = Port;
 
             this.JsonOnly = JsonOnly;
             this.AutoReconnect = AutoReconnect;
             this.UseAckTimeout = UseAckTimeout;
+
+            Initialize();
+        }
+
+        private void Initialize()
+        {
+            Client = new WebSocket(URI);
+
+            Client.OnOpen += OnWebsocketOpen;
+            Client.OnClose += OnWebsocketClose;
+            Client.OnMessage += OnWebsocketMessage;
+            Client.OnError += OnWebsocketError;
         }
 
         public void Connect()
         {
-            if (this.Client == null)
-                Initialize(this.ConnectionInformation.Scheme, this.ConnectionInformation.Host, this.ConnectionInformation.Port, this.JsonOnly, this.AutoReconnect, this.UseAckTimeout);
-            this.Client.Connect();
+            if (Client == null)
+            {
+                Initialize();
+            }
+                
+            Client.Connect();
         }
 
         public void Close()
         {
-            if (this.Client != null && this.Client.IsAlive)
-            {
-                this.Client.Close();
-                this.Client = null;
-            }
+            Client?.Close();
+            Client = null;
 
-            if (this.AckManager != null)
-            {
-                this.AckManager.Dispose();
-                this.AckManager = null;
-            }
+            AckManager?.Dispose();
+            AckManager = null;
 
-            this.StopHeartbeatTimers();
-            this.Reconstructor.Dispose();
+            StopHeartbeat();
+            Reconstructor.Dispose();
         }
 
         public void Dispose()
         {
-            this.Close();
+            Close();
         }
+
+        public delegate void SocketIOEventAction(JToken[] Data);
+        public delegate void SocketIOAckAction(JToken[] Data, SocketIOEventAction Action);
+        
 
         public enum Scheme
         {
@@ -95,7 +127,7 @@ namespace SocketIOSharp.Client
 
         private class ConnctionData
         {
-            internal SocketIOClient.Scheme Scheme = Scheme.ws;
+            internal Scheme Scheme = Scheme.ws;
             internal string Host = string.Empty;
             internal int Port = 0;
 

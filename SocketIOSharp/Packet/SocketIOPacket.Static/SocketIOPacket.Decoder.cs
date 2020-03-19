@@ -21,8 +21,11 @@ namespace SocketIOSharp.Packet
             catch (Exception ex)
             {
                 StringBuilder Builder = new StringBuilder();
+
                 if (RawData != null)
+                {
                     Builder.Append(BitConverter.ToString(RawData));
+                }
 
                 throw new SocketIOClientException("Packet decoding failed. " + Builder, ex);
             }
@@ -30,13 +33,12 @@ namespace SocketIOSharp.Packet
 
         public static SocketIOPacket Decode(EngineIOPacketType EnginePacketType, byte[] BinaryData)
         {
-            SocketIOPacket Packet = new SocketIOPacket();
-
-            Packet.EnginePacketType = EnginePacketType;
-            Packet.BinaryData = new List<byte>(BinaryData).ToArray();
-            Packet.IsBinary = true;
-
-            return Packet;
+            return new SocketIOPacket
+            {
+                EnginePacketType = EnginePacketType,
+                BinaryData = new List<byte>(BinaryData).ToArray(),
+                IsBinary = true
+            };
         }
 
         public static SocketIOPacket Decode(string PacketString)
@@ -47,47 +49,73 @@ namespace SocketIOSharp.Packet
                 int Offset = 0;
 
                 if ((Packet.EnginePacketType = (EngineIOPacketType)(PacketString[Offset] - '0')) == EngineIOPacketType.MESSAGE)
+                {
                     Packet.SocketPacketType = (SocketIOPacketType)(PacketString[++Offset] - '0');
+                }
+
                 if (PacketString.Length <= 2)
+                {
                     return Packet;
+                }
 
                 if (Packet.SocketPacketType == SocketIOPacketType.BINARY_EVENT || Packet.SocketPacketType == SocketIOPacketType.BINARY_ACK)
                 {
                     StringBuilder Builder = new StringBuilder();
+
                     while (Offset < PacketString.Length - 1)
                     {
                         char c = PacketString[++Offset];
+
                         if (char.IsNumber(c))
+                        {
                             Builder.Append(c);
-                        else break;
+                        }
+                        else
+                        {
+                            break;
+                        }
                     }
+
                     Packet.Attachments = new Queue<SocketIOPacket>(new SocketIOPacket[int.Parse(Builder.ToString())]);
                 }
 
                 if ('/' == PacketString[Offset + 1])
                 {
                     StringBuilder Builder = new StringBuilder();
+
                     while (Offset < PacketString.Length - 1 && PacketString[++Offset] != ',')
+                    {
                         Builder.Append(PacketString[Offset]);
+                    }
+
                     Packet.Namespace = Builder.ToString();
                 }
-                else Packet.Namespace = "/";
+                else
+                {
+                    Packet.Namespace = "/";
+                }
 
                 char Next = PacketString[Offset + 1];
+
                 if (!char.IsWhiteSpace(Next) && char.IsNumber(Next))
                 {
                     StringBuilder Builder = new StringBuilder();
+
                     while (Offset < PacketString.Length - 1)
                     {
                         char c = PacketString[++Offset];
+
                         if (char.IsNumber(c))
+                        {
                             Builder.Append(c);
+                        }
                         else
                         {
                             --Offset;
                             break;
                         }
                     }
+
                     Packet.ID = int.Parse(Builder.ToString());
                 }
 

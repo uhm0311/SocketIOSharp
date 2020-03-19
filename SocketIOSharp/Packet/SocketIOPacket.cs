@@ -22,42 +22,57 @@ namespace SocketIOSharp.Packet
 
         private SocketIOPacket()
         {
-            this.EnginePacketType = EngineIOPacketType.UNKNOWN;
-            this.SocketPacketType = SocketIOPacketType.UNKNOWN;
+            EnginePacketType = EngineIOPacketType.UNKNOWN;
+            SocketPacketType = SocketIOPacketType.UNKNOWN;
 
-            this.Attachments = new Queue<SocketIOPacket>();
-            this.Namespace = "/";
-            this.ID = -1;
+            Attachments = new Queue<SocketIOPacket>();
+            Namespace = "/";
+            ID = -1;
 
-            this.IsJson = false;
-            this.IsBinary = false;
+            IsJson = false;
+            IsBinary = false;
 
-            this.JsonData = null;
-            this.BinaryData = null;
+            JsonData = null;
+            BinaryData = null;
         }
 
         private SocketIOPacket(SocketIOPacket Packet)
         {
-            this.EnginePacketType = Packet.EnginePacketType;
-            this.SocketPacketType = Packet.SocketPacketType;
+            EnginePacketType = Packet.EnginePacketType;
+            SocketPacketType = Packet.SocketPacketType;
 
             if (Packet.Attachments != null)
-                this.Attachments = new Queue<SocketIOPacket>(Packet.Attachments);
-            else this.Attachments = null;
+            {
+                Attachments = new Queue<SocketIOPacket>(Packet.Attachments);
+            }
+            else
+            {
+                Attachments = null;
+            }
 
-            this.Namespace = Packet.Namespace;
-            this.ID = Packet.ID;
+            Namespace = Packet.Namespace;
+            ID = Packet.ID;
 
-            this.IsJson = Packet.IsJson;
-            this.IsBinary = Packet.IsBinary;
+            IsJson = Packet.IsJson;
+            IsBinary = Packet.IsBinary;
 
             if (Packet.JsonData != null)
-                this.JsonData = Packet.JsonData.DeepClone();
-            else this.JsonData = null;
+            {
+                JsonData = Packet.JsonData.DeepClone();
+            }
+            else
+            {
+                JsonData = null;
+            }
 
             if (Packet.BinaryData != null)
-                this.BinaryData = new List<byte>(Packet.BinaryData).ToArray();
-            else this.BinaryData = null;
+            {
+                BinaryData = new List<byte>(Packet.BinaryData).ToArray();
+            }
+            else
+            {
+                BinaryData = null;
+            }
         }
 
         public SocketIOPacket DeepClone()
@@ -67,24 +82,38 @@ namespace SocketIOSharp.Packet
 
         public override string ToString()
         {
-            StringBuilder String = new StringBuilder(string.Format("Packet: EnginePacketType={0}, SocketPacketType={1}, ", EnginePacketType, SocketPacketType));
+            StringBuilder Builder = new StringBuilder(string.Format
+            (
+                "Packet: EnginePacketType={0}, SocketPacketType={1}, ", 
+                EnginePacketType, 
+                SocketPacketType
+            ));
+
             if (Attachments != null && Attachments.Count > 0)
             {
-                String.Append("Attachments=[");
-                foreach (SocketIOPacket Attachment in Attachments)
-                    String.Append(Attachment.ToString());
+                Builder.Append("Attachments=[");
 
-                String.Append("], ");
+                foreach (SocketIOPacket Attachment in Attachments)
+                {
+                    Builder.Append(Attachment.ToString());
+                }
+
+                Builder.Append("], ");
             }
-            String.Append(string.Format("Namespace={0}, ID={1}", Namespace, ID));
+
+            Builder.Append(string.Format("Namespace={0}, ID={1}", Namespace, ID));
 
             if (JsonData != null)
-                String.Append(string.Format(", JsonData={0}", JsonData));
+            {
+                Builder.Append(string.Format(", JsonData={0}", JsonData));
+            }
 
             if (BinaryData != null)
-                String.Append(string.Format(", BinaryData={0}", BitConverter.ToString(BinaryData)));
+            {
+                Builder.Append(string.Format(", BinaryData={0}", BitConverter.ToString(BinaryData)));
+            }
 
-            return String.ToString();
+            return Builder.ToString();
         }
     }
 }

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Timers;
+using static SocketIOSharp.Client.SocketIOClient;
 
 namespace SocketIOSharp.Packet.Ack
 {
@@ -15,21 +16,24 @@ namespace SocketIOSharp.Packet.Ack
 
         private readonly List<SocketIOAck> AckList = new List<SocketIOAck>();
         private readonly object AckMutex = new object();
+
         public bool AutoRemove { get; set; }
 
         public SocketIOAckManager()
         {
-            this.SetTimeout(TimeoutInMillis);
-            this.UseAckTimeout = false;
+            SetTimeout(TimeoutInMillis);
+            UseAckTimeout = false;
 
-            this.AckTimer.Elapsed += (sender, e) =>
+            AckTimer.Elapsed += (sender, e) =>
             {
                 lock (AckMutex)
                 {
                     for (int i = 0; UseAckTimeout && i < AckList.Count; i++)
                     {
                         if (AckList[i] != null && DateTime.UtcNow.Subtract(AckList[i].RequestedTime).TotalMilliseconds > TimeoutInMillis)
+                        {
                             AckList[i] = null;
+                        }
                     }
                 }
             };
@@ -62,10 +66,12 @@ namespace SocketIOSharp.Packet.Ack
         public void SetTimeout(double TimeoutInMillis)
         {
             if (TimeoutInMillis >= MinTimeout)
+            {
                 AckTimer.Interval = (this.TimeoutInMillis = TimeoutInMillis) / MinTimeout;
+            }
         }
 
-        public SocketIOAck CreateAck(Action<JToken[]> AckAction = null)
+        public SocketIOAck CreateAck(SocketIOEventAction AckAction = null)
         {
             if (AckAction != null)
             {
@@ -76,7 +82,9 @@ namespace SocketIOSharp.Packet.Ack
                         if (i < AckList.Count)
                         {
                             if (AckList[i] == null)
+                            {
                                 return (AckList[i] = new SocketIOAck(i, AckAction));
+                            }
                         }
                         else
                         {
@@ -88,7 +96,10 @@ namespace SocketIOSharp.Packet.Ack
                     }
                 }
             }
-            else return null;
+            else
+            {
+                return null;
+            }
         }
 
         public void Invoke(int PacketID, params JToken[] Data)
@@ -100,7 +111,9 @@ namespace SocketIOSharp.Packet.Ack
                     AckList[PacketID].Invoke(Data);
 
                     if (AutoRemove)
+                    {
                         AckList[PacketID] = null;
+                    }
                 }
             }
         }
@@ -110,7 +123,9 @@ namespace SocketIOSharp.Packet.Ack
             lock (AckMutex)
             {
                 if (AckList.Count > PacketID)
+                {
                     AckList[PacketID] = null;
+                }
             }
         }
     }

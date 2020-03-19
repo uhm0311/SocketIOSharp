@@ -12,17 +12,18 @@ namespace SocketIOSharp.Packet.Binary.Constructors
             {
                 base.SetPacket(ConstructeePacket);
 
-                Action<JToken> EnqueueAction = new Action<JToken>((Data) => ConstructeeTokens.Enqueue(Data));
-
-                Tuple<Condition, Action<JToken>>[] ConditionalActions = new Tuple<Condition, Action<JToken>>[]
+                ConstructorAction EnqueueAction = new ConstructorAction((Data) => ConstructeeTokens.Enqueue(Data));
+                Tuple<Condition, ConstructorAction>[] ConditionalActions = new Tuple<Condition, ConstructorAction>[]
                 {
-                    new Tuple<Condition, Action<JToken>>(IsPlaceholder, EnqueueAction),
+                    new Tuple<Condition, ConstructorAction>(IsPlaceholder, EnqueueAction),
                 };
 
-                base.DFS(ConstructeePacket.JsonData, ConditionalActions);
+                DFS(ConstructeePacket.JsonData, ConditionalActions);
 
                 if (ConstructeePacket.Attachments.Count != ConstructeeTokenCount)
+                {
                     throw new SocketIOClientException("Attachment count is not match to placeholder count. " + this);
+                }
             }
         }
 
@@ -31,14 +32,19 @@ namespace SocketIOSharp.Packet.Binary.Constructors
             if (ConstructeeTokenCount > 0)
             {
                 JToken Parent = base.DequeueConstructeeTokenParent(out object Key);
-                base.ConstructeePacket.Attachments.Dequeue();
+                ConstructeePacket.Attachments.Dequeue();
 
                 Parent[Key] = BinaryData;
             }
 
             if (ConstructeeTokenCount == 0)
-                return base.ConstructeePacket;
-            else return null;
+            {
+                return ConstructeePacket;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         public override string ToString()

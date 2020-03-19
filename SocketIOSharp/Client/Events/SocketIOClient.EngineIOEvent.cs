@@ -47,18 +47,18 @@ namespace SocketIOSharp.Client
                 ConnectionInformation.PingTimeout = int.Parse(JsonData["pingTimeout"].ToString());
 
                 AckManager.SetTimeout(ConnectionInformation.PingTimeout);
-                StartHeartbeatTimers();
+                StartHeartbeat();
             }
         }
 
         private void HandleClose()
         {
-            this.Close();
+            Close();
         }
 
         private void HandlePing()
         {
-            this.Emit(SocketIOPacket.Factory.CreatePongPacket());
+            Emit(SocketIOPacket.Factory.CreatePongPacket());
         }
 
         private void HandlePong()
@@ -69,7 +69,9 @@ namespace SocketIOSharp.Client
         private void HandleMessage(SocketIOPacket Packet, bool IsBinary = false)
         {
             if (Packet != null)
+            {
                 HandleSocketPacket(Packet, IsBinary);
+            }
         }
 
         private void HandleEtcEnginePacket()

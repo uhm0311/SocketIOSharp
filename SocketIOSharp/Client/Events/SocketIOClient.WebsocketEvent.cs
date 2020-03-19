@@ -7,27 +7,38 @@ namespace SocketIOSharp.Client
     {
         private void OnWebsocketOpen(object sender, EventArgs e)
         {
-            return;
         }
 
         private void OnWebsocketClose(object sender, WebSocketSharp.CloseEventArgs e)
         {
-            this.CallEventHandler(Event.DISCONNECT);
+            CallEventHandler(Event.DISCONNECT);
 
-            if (this.AutoReconnect)
-                this.Connect();
+            if (AutoReconnect)
+            {
+                Connect();
+            }
         }
 
         private void OnWebsocketError(object sender, WebSocketSharp.ErrorEventArgs e)
         {
-            this.Emit(Event.ERROR, e.Message);
-            this.Close();
+            Emit(Event.ERROR, e.Message);
+            Close();
         }
 
         private void OnWebsocketMessage(object sender, WebSocketSharp.MessageEventArgs e)
         {
-            SocketIOPacket Packet = (e.IsText ? SocketIOPacket.Decode(e.Data) : (e.IsBinary ? SocketIOPacket.Decode(e.RawData) : null));
-            this.HandleEnginePacket(Packet, e.IsBinary);
+            SocketIOPacket Packet = null;
+
+            if (e.IsText)
+            {
+                Packet = SocketIOPacket.Decode(e.Data);
+            }
+            else if (e.IsBinary)
+            {
+                Packet = SocketIOPacket.Decode(e.RawData);
+            }
+
+            HandleEnginePacket(Packet, e.IsBinary);
         }
     }
 }

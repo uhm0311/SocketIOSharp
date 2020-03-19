@@ -23,8 +23,13 @@ namespace SocketIOSharp.Packet
                 SocketIOPacket Packet = CreateMessagePacket(JsonArray, Ack, JsonOnly);
 
                 if (Packet.IsJson)
+                {
                     Packet.SocketPacketType = SocketIOPacketType.EVENT;
-                else Packet.SocketPacketType = SocketIOPacketType.BINARY_EVENT;
+                }
+                else
+                {
+                    Packet.SocketPacketType = SocketIOPacketType.BINARY_EVENT;
+                }
 
                 Packet.IsJson = true;
                 return Packet;
@@ -37,13 +42,21 @@ namespace SocketIOSharp.Packet
                     SocketIOPacket Packet = CreateMessagePacket(JsonArray, PacketID, false);
 
                     if (Packet.IsJson)
+                    {
                         Packet.SocketPacketType = SocketIOPacketType.ACK;
-                    else Packet.SocketPacketType = SocketIOPacketType.BINARY_ACK;
+                    }
+                    else
+                    {
+                        Packet.SocketPacketType = SocketIOPacketType.BINARY_ACK;
+                    }
 
                     Packet.IsJson = true;
                     return Packet;
                 }
-                else return null;
+                else
+                {
+                    return null;
+                }
             }
 
             private static SocketIOPacket CreateMessagePacket(JArray JsonArray, SocketIOAck Ack, bool JsonOnly)
@@ -58,7 +71,9 @@ namespace SocketIOSharp.Packet
                 Packet.IsJson = true;
 
                 if (PacketID >= 0)
+                {
                     Packet.ID = PacketID;
+                }
 
                 if (!JsonOnly)
                 {
@@ -68,7 +83,9 @@ namespace SocketIOSharp.Packet
                         Packet = Deconstructor.Deconstruct();
 
                         if (Packet.Attachments.Count > 0)
+                        {
                             Packet.IsJson = false;
+                        }
                     }
                 }
 

@@ -11,8 +11,8 @@ namespace SocketIOSharp.Client
     partial class SocketIOClient
     {
         private readonly Reconstructor Reconstructor = new Reconstructor();
-        private readonly ConcurrentDictionary<JToken, List<Action<JToken[]>>> EventHandlers = new ConcurrentDictionary<JToken, List<Action<JToken[]>>>();
-        private readonly ConcurrentDictionary<JToken, List<Action<JToken[], Action<JToken[]>>>> AckHandlers = new ConcurrentDictionary<JToken, List<Action<JToken[], Action<JToken[]>>>>();
+        private readonly ConcurrentDictionary<JToken, List<SocketIOEventAction>> EventHandlers = new ConcurrentDictionary<JToken, List<SocketIOEventAction>>();
+        private readonly ConcurrentDictionary<JToken, List<SocketIOAckAction>> AckHandlers = new ConcurrentDictionary<JToken, List<SocketIOAckAction>>();
 
         private void HandleSocketPacket(SocketIOPacket Packet, bool IsBinary)
         {
@@ -59,7 +59,7 @@ namespace SocketIOSharp.Client
 
         private void HandleDisconnect()
         {
-            this.Close();
+            Close();
         }
 
         private void HandleEvent(SocketIOPacket Packet)
@@ -70,12 +70,14 @@ namespace SocketIOSharp.Client
         private void HandleAck(SocketIOPacket Packet)
         {
             if (Packet != null && Packet.JsonData != null)
-                AckManager.Invoke(Packet.ID, ((JArray)Packet.JsonData).ToArray<JToken>());
+            {
+                AckManager.Invoke(Packet.ID, ((JArray)Packet.JsonData).ToArray());
+            }
         }
 
         private void HandleError(SocketIOPacket Packet)
         {
-            CallEventHandler(Event.ERROR, Packet != null && Packet.JsonData != null ? Packet.JsonData.ToString() : string.Empty);
+            CallEventHandler(Event.ERROR, Packet?.JsonData?.ToString() ?? string.Empty);
         }
 
         private void HandleBinaryEvent(SocketIOPacket Packet)
@@ -91,8 +93,18 @@ namespace SocketIOSharp.Client
         private void HandleBinaryPacket(SocketIOPacket Packet)
         {
             if (Packet != null && Reconstructor.ConstructeeTokenCount == 0)
+            {
                 Reconstructor.SetPacket(Packet);
-            else throw new SocketIOClientException(string.Format("Unexpected binary data: {0}. Reconstructor: {1}.", Packet, Reconstructor.OriginalPacket));
+            }
+            else
+            {
+                throw new SocketIOClientException(string.Format
+                (
+                    "Unexpected binary data: {0}. Reconstructor: {1}.", 
+                    Packet, 
+                    Reconstructor.OriginalPacket
+                ));
+            }
         }
 
         private void HandleEtcSocketPacket(SocketIOPacket Packet, bool IsBinary)
@@ -108,53 +120,66 @@ namespace SocketIOSharp.Client
                         using (Reconstructor)
                         {
                             if (ReconstructedPacket.ID >= 0)
+                            {
                                 HandleAck(ReconstructedPacket);
-                            else HandleEvent(ReconstructedPacket);
+                            }
+                            else
+                            {
+                                HandleEvent(ReconstructedPacket);
+                            }
                         }
                     }
                 }
             }
         }
 
-        public void On(JToken Event, Action<JToken[]> Callback)
+        public void On(JToken Event, SocketIOEventAction Callback)
         {
             if (Event != null)
             {
                 if (!EventHandlers.ContainsKey(Event))
-                    EventHandlers.TryAdd(Event, new List<Action<JToken[]>>());
+                {
+                    EventHandlers.TryAdd(Event, new List<SocketIOEventAction>());
+                }
 
                 EventHandlers[Event].Add(Callback);
             }
         }
 
-        public void Off(JToken Event, Action<JToken[]> Callback)
+        public void Off(JToken Event, SocketIOEventAction Callback)
         {
             if (Event != null && EventHandlers.ContainsKey(Event))
+            {
                 EventHandlers[Event].Remove(Callback);
+            }
         }
 
-        public void On(JToken Event, Action<JToken[], Action<JToken[]>> Callback)
+        public void On(JToken Event, SocketIOAckAction Callback)
         {
             if (Event != null)
             {
                 if (!AckHandlers.ContainsKey(Event))
-                    AckHandlers.TryAdd(Event, new List<Action<JToken[], Action<JToken[]>>>());
+                {
+                    AckHandlers.TryAdd(Event, new List<SocketIOAckAction>());
+                }
 
                 AckHandlers[Event].Add(Callback);
             }
         }
 
-        public void Off(JToken Event, Action<JToken[], Action<JToken[]>> Callback)
+        public void Off(JToken Event, SocketIOAckAction Callback)
         {
             if (Event != null && AckHandlers.ContainsKey(Event))
+            {
                 AckHandlers[Event].Remove(Callback);
+            }
         }
 
         private void CallHandler(SocketIOPacket Packet)
         {
             if (Packet != null && Packet.JsonData != null)
             {
-                Queue<JToken> Temp = new Queue<JToken>(((JArray)Packet.JsonData).ToArray<JToken>());
+                Queue<JToken> Temp = new Queue<JToken>(((JArray)Packet.JsonData).ToArray());
 
                 if (Temp.Count > 0)
                 {
@@ -171,11 +196,17 @@ namespace SocketIOSharp.Client
         {
             if (Event != null && AckHandlers.ContainsKey(Event))
             {
-                foreach (Action<JToken[], Action<JToken[]>> Callback in AckHandlers[Event])
+                foreach (SocketIOAckAction Callback in AckHandlers[Event])
                 {
-                    Action<JToken[]> AckAction = null;
+                    SocketIOEventAction AckAction = null;
+
                     if (PacketID >= 0)
-                        AckAction = (AckData) => this.Emit(SocketIOPacket.Factory.CreateAckPacket(new JArray(AckData), PacketID));
+                    {
+                        AckAction = (AckData) =>
+                        {
+                            Emit(SocketIOPacket.Factory.CreateAckPacket(new JArray(AckData), PacketID));
+                        };
+                    }
 
                     Callback(Data, AckAction);
                 }
@@ -186,8 +217,10 @@ namespace SocketIOSharp.Client
         {
             if (Event != null && EventHandlers.ContainsKey(Event))
             {
-                foreach (Action<JToken[]> Callback in EventHandlers[Event])
+                foreach (SocketIOEventAction Callback in EventHandlers[Event])
+                {
                     Callback(Data);
+                }
             }
         }
 

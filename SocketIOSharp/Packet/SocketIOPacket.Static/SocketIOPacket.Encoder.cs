@@ -14,9 +14,7 @@ namespace SocketIOSharp.Packet
             {
                 if (Packet.IsBinary)
                 {
-                    List<byte> RawData = new List<byte>();
-
-                    RawData.Add((byte)Packet.EnginePacketType);
+                    List<byte> RawData = new List<byte> { (byte)Packet.EnginePacketType };
                     RawData.AddRange(Packet.BinaryData);
 
                     return RawData.ToArray();
@@ -26,14 +24,21 @@ namespace SocketIOSharp.Packet
                     StringBuilder Builder = new StringBuilder();
 
                     if (Packet.EnginePacketType.Equals(EngineIOPacketType.UNKNOWN))
+                    {
                         return Builder.ToString();
+                    }
 
                     Builder.Append((int)Packet.EnginePacketType);
+
                     if (!Packet.EnginePacketType.Equals(EngineIOPacketType.MESSAGE))
+                    {
                         return Builder.ToString();
+                    }
 
                     if (!Packet.SocketPacketType.Equals(SocketIOPacketType.UNKNOWN))
+                    {
                         Builder.Append((int)Packet.SocketPacketType);
+                    }
 
                     if (Packet.SocketPacketType == SocketIOPacketType.BINARY_EVENT || Packet.SocketPacketType == SocketIOPacketType.BINARY_ACK)
                     {
@@ -48,13 +53,20 @@ namespace SocketIOSharp.Packet
                     }
 
                     if (Packet.ID > -1)
+                    {
                         Builder.Append(Packet.ID);
+                    }
 
                     if (Packet.IsJson)
                     {
                         if (Packet != null)
+                        {
                             Builder.Append(Packet.JsonData.ToString());
-                        else Builder.Append("[null]");
+                        }
+                        else
+                        {
+                            Builder.Append("[null]");
+                        }
                     }
 
                     return Builder.ToString();

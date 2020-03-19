@@ -15,29 +15,32 @@ namespace SocketIOSharp.Packet.Binary.Constructors
             {
                 base.SetPacket(ConstructeePacket);
 
-                Action<JToken> EnqueueAction = new Action<JToken>((Data) => ConstructeeTokens.Enqueue(Data));
-                Action<JToken> CountAction = new Action<JToken>((Data) => PlaceholderCount++);
+                ConstructorAction EnqueueAction = new ConstructorAction((Data) => ConstructeeTokens.Enqueue(Data));
+                ConstructorAction CountAction = new ConstructorAction((Data) => PlaceholderCount++);
 
-                Tuple<Condition, Action<JToken>>[] ConditionalActions = new Tuple<Condition, Action<JToken>>[]
+                Tuple<Condition, ConstructorAction>[] ConditionalActions = new Tuple<Condition, ConstructorAction>[]
                 {
-                    new Tuple<Condition, Action<JToken>>(IsBytes, EnqueueAction),
-                    new Tuple<Condition, Action<JToken>>(IsPlaceholder, CountAction)
+                    new Tuple<Condition, ConstructorAction>(IsBytes, EnqueueAction),
+                    new Tuple<Condition, ConstructorAction>(IsPlaceholder, CountAction)
                 };
 
-                base.DFS(ConstructeePacket.JsonData, ConditionalActions);
+                DFS(ConstructeePacket.JsonData, ConditionalActions);
 
                 if (PlaceholderCount > 0)
+                {
                     throw new SocketIOClientException("Bytes token count is not match to placeholder count. " + this);
+                }
             }
         }
 
         public SocketIOPacket Deconstruct()
         {
             int PlaceholderIndex = 0;
+
             while (ConstructeeTokenCount > 0)
             {
-                JToken Parent = base.DequeueConstructeeTokenParent(out object Key);
-                base.ConstructeePacket.Attachments.Enqueue(SocketIOPacket.Decode(EngineIOPacketType.MESSAGE, (byte[])Parent[Key]));
+                JToken Parent = DequeueConstructeeTokenParent(out object Key);
+                ConstructeePacket.Attachments.Enqueue(SocketIOPacket.Decode(EngineIOPacketType.MESSAGE, (byte[])Parent[Key]));
 
                 Parent[Key] = new JObject
                 {
@@ -46,7 +49,7 @@ namespace SocketIOSharp.Packet.Binary.Constructors
                 };
             }
 
-            return base.ConstructeePacket;
+            return ConstructeePacket;
         }
 
         public override string ToString()
