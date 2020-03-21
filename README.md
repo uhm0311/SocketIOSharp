@@ -153,7 +153,7 @@ client.Emit("Event with data and ack, action as method", 42, Console.WriteLine);
 - Partly implemented `Engine.IO` protocol. For now, `WebSocket` is the **ONLY** supported transport. And the packet type `upgrade` and `noop` is **NOT** supproted. See [Engine.IO protocol specifications](https://github.com/socketio/engine.io-protocol) for details.
 
 # Planned features
-- Fully implemented `Engine.IO` client (It will implemented as independent project)
+- Fully implemented `Engine.IO` client (Working on [here](https://github.com/uhm0311/EngineIOSharp))
 - Transport without `WebSocket`
 
 # Limitations
