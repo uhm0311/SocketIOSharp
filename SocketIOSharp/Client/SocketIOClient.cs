@@ -44,9 +44,7 @@ namespace SocketIOSharp.Client
             ConnectionInformation.Host = Host;
             ConnectionInformation.Port = Port;
 
-            this.JsonOnly = JsonOnly;
             this.AutoReconnect = AutoReconnect;
-            this.UseAckTimeout = UseAckTimeout;
 
             Initialize();
         }
