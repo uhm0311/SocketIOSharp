@@ -1,4 +1,5 @@
-﻿using SocketIOSharp.Client;
+﻿using Newtonsoft.Json.Linq;
+using SocketIOSharp.Client;
 using SocketIOSharp.Common;
 using System;
 
@@ -42,7 +43,7 @@ namespace SocketIOSharp.Example
 
             client.On("echo", (Data) =>
             {
-                Console.WriteLine("Echo : " + Data[0]);
+                Console.WriteLine("Echo : " + (Data[0].Type == JTokenType.Bytes ? BitConverter.ToString(Data[0].ToObject<byte[]>()) : Data[0]));
             });
 
             client.On("echo array", (Data) =>

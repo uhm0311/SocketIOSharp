@@ -9,6 +9,7 @@ server.listen(port, function () {
 	
 	io.on('connection', function (socket) {
 		console.log('Client connected!');
+		socket.emit('echo', Buffer.from([0, 1, 2, 3, 4, 5]));
 		
 		socket.on('input', function (input) {
 			console.log('Client : ' + input);
