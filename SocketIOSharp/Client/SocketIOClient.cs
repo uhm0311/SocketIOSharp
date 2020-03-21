@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
-using SocketIOSharp.Packet.Ack;
+﻿using SocketIOSharp.Common.Manager;
 using System;
 using WebSocketSharp;
 
@@ -114,9 +113,6 @@ namespace SocketIOSharp.Client
         {
             Close();
         }
-
-        public delegate void EventAction(JToken[] Data);
-        public delegate void AckAction(JToken[] Data, EventAction Callback);
 
         public enum Scheme
         {

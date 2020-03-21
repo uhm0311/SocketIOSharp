@@ -1,4 +1,4 @@
-﻿using SocketIOSharp.Packet;
+﻿using SocketIOSharp.Common.Packet;
 using System.Timers;
 
 namespace SocketIOSharp.Client

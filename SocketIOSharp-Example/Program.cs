@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SocketIOSharp.Client;
+﻿using SocketIOSharp.Client;
+using SocketIOSharp.Common;
+using System;
 
 namespace SocketIOSharp.Example
 {
@@ -32,12 +29,12 @@ namespace SocketIOSharp.Example
 
         static void InitEventHandlers(SocketIOClient client)
         {
-            client.On(SocketIOClient.Event.CONNECTION, (Data) =>
+            client.On(SocketIOEvent.CONNECTION, (Data) =>
             {
                 Console.WriteLine("Connected!");
             });
 
-            client.On(SocketIOClient.Event.DISCONNECT, (Data) =>
+            client.On(SocketIOEvent.DISCONNECT, (Data) =>
             {
                 Console.WriteLine();
                 Console.WriteLine("Disconnected!");

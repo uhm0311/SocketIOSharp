@@ -3,7 +3,7 @@ using SocketIOSharp.Client;
 using System;
 using System.Collections.Generic;
 
-namespace SocketIOSharp.Packet.Binary.Constructors
+namespace SocketIOSharp.Common.Packet.Binary.Constructors
 {
     internal class Deconstructor : Constructor
     {

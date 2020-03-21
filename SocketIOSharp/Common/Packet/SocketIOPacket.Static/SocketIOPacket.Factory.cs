@@ -1,8 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
-using SocketIOSharp.Packet.Ack;
-using SocketIOSharp.Packet.Binary.Constructors;
+using SocketIOSharp.Common.Packet.Binary.Constructors;
 
-namespace SocketIOSharp.Packet
+namespace SocketIOSharp.Common.Packet
 {
     partial class SocketIOPacket
     {

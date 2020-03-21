@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
-using SocketIOSharp.Packet;
+using SocketIOSharp.Common.Packet;
 
 namespace SocketIOSharp.Client
 {

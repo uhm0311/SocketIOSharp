@@ -2,7 +2,7 @@
 using SocketIOSharp.Client;
 using System;
 
-namespace SocketIOSharp.Packet.Binary.Constructors
+namespace SocketIOSharp.Common.Packet.Binary.Constructors
 {
     internal class Reconstructor : Constructor
     {

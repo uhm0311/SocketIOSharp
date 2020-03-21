@@ -1,17 +1,17 @@
 ﻿using Newtonsoft.Json.Linq;
+using SocketIOSharp.Common.Action;
 using System;
-using static SocketIOSharp.Client.SocketIOClient;
 
-namespace SocketIOSharp.Packet.Ack
+namespace SocketIOSharp.Common.Packet
 {
     internal class SocketIOAck
     {
         public DateTime RequestedTime { get; private set; }
 
         public int PacketID { get; private set; }
-        public EventAction Callback { get; private set; }
+        public SocketIOAction.Event Callback { get; private set; }
 
-        internal SocketIOAck(int PacketID, EventAction Callback = null)
+        internal SocketIOAck(int PacketID, SocketIOAction.Event Callback = null)
         {
             RequestedTime = DateTime.UtcNow;
 
@@ -28,8 +28,8 @@ namespace SocketIOSharp.Packet.Ack
         {
             return string.Format
             (
-                "[Ack: PacketID={0}, RequestedTime={1}, Action={2}]", 
-                PacketID, 
+                "[Ack: PacketID={0}, RequestedTime={1}, Action={2}]",
+                PacketID,
                 RequestedTime,
                 Callback
             );

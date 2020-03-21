@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SocketIOSharp.Packet.Binary.Constructors
+namespace SocketIOSharp.Common.Packet.Binary.Constructors
 {
     internal abstract class Constructor : IDisposable
     {

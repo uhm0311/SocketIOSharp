@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
-using SocketIOSharp.Packet;
-using System;
+using SocketIOSharp.Common;
+using SocketIOSharp.Common.Action;
+using SocketIOSharp.Common.Packet;
 
 namespace SocketIOSharp.Client
 {
@@ -25,12 +26,12 @@ namespace SocketIOSharp.Client
             return Result;
         }
 
-        public void Emit(JToken Event, EventAction Callback = null)
+        public void Emit(JToken Event, SocketIOAction.Event Callback = null)
         {
             Emit(Event, Arguments(Callback));
         }
 
-        public void Emit(JToken Event, JToken Data, EventAction Callback = null)
+        public void Emit(JToken Event, JToken Data, SocketIOAction.Event Callback = null)
         {
             Emit(Event, Arguments(Data, Callback));
         }
@@ -40,13 +41,13 @@ namespace SocketIOSharp.Client
             if (Event != null)
             {
                 JArray JsonArray = new JArray();
-                EventAction Callback = null;
+                SocketIOAction.Event Callback = null;
                 int ArgumentsCount = Arguments.Length;
 
-                if (ArgumentsCount > 0 && Arguments[Arguments.Length - 1] is EventAction)
+                if (ArgumentsCount > 0 && Arguments[Arguments.Length - 1] is SocketIOAction.Event)
                 {
                     ArgumentsCount--;
-                    Callback = (EventAction)Arguments[Arguments.Length - 1];
+                    Callback = (SocketIOAction.Event)Arguments[Arguments.Length - 1];
                 }
 
                 JsonArray.Add(Event);

@@ -1,4 +1,5 @@
-﻿using SocketIOSharp.Packet;
+﻿using SocketIOSharp.Common;
+using SocketIOSharp.Common.Packet;
 using System;
 
 namespace SocketIOSharp.Client
@@ -11,7 +12,7 @@ namespace SocketIOSharp.Client
 
         private void OnWebsocketClose(object sender, WebSocketSharp.CloseEventArgs e)
         {
-            CallEventHandler(Event.DISCONNECT);
+            CallEventHandler(SocketIOEvent.DISCONNECT);
 
             if (AutoReconnect)
             {
@@ -21,7 +22,7 @@ namespace SocketIOSharp.Client
 
         private void OnWebsocketError(object sender, WebSocketSharp.ErrorEventArgs e)
         {
-            Emit(Event.ERROR, e.Message);
+            Emit(SocketIOEvent.ERROR, e.Message);
             Close();
         }
 

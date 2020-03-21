@@ -1,10 +1,11 @@
 ﻿using Newtonsoft.Json.Linq;
+using SocketIOSharp.Common.Action;
+using SocketIOSharp.Common.Packet;
 using System;
 using System.Collections.Generic;
 using System.Timers;
-using static SocketIOSharp.Client.SocketIOClient;
 
-namespace SocketIOSharp.Packet.Ack
+namespace SocketIOSharp.Common.Manager
 {
     internal class SocketIOAckManager
     {
@@ -71,7 +72,7 @@ namespace SocketIOSharp.Packet.Ack
             }
         }
 
-        public SocketIOAck CreateAck(EventAction Callback = null)
+        public SocketIOAck CreateAck(SocketIOAction.Event Callback = null)
         {
             if (Callback != null)
             {

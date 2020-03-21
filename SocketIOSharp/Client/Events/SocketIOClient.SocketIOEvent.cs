@@ -1,7 +1,8 @@
 ﻿using Newtonsoft.Json.Linq;
-using SocketIOSharp.Packet;
-using SocketIOSharp.Packet.Binary.Constructors;
-using System;
+using SocketIOSharp.Common;
+using SocketIOSharp.Common.Action;
+using SocketIOSharp.Common.Packet;
+using SocketIOSharp.Common.Packet.Binary.Constructors;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,8 +12,8 @@ namespace SocketIOSharp.Client
     partial class SocketIOClient
     {
         private readonly Reconstructor Reconstructor = new Reconstructor();
-        private readonly ConcurrentDictionary<JToken, List<EventAction>> EventHandlers = new ConcurrentDictionary<JToken, List<EventAction>>();
-        private readonly ConcurrentDictionary<JToken, List<AckAction>> AckHandlers = new ConcurrentDictionary<JToken, List<AckAction>>();
+        private readonly ConcurrentDictionary<JToken, List<SocketIOAction.Event>> EventHandlers = new ConcurrentDictionary<JToken, List<SocketIOAction.Event>>();
+        private readonly ConcurrentDictionary<JToken, List<SocketIOAction.Ack>> AckHandlers = new ConcurrentDictionary<JToken, List<SocketIOAction.Ack>>();
 
         private void HandleSocketPacket(SocketIOPacket Packet, bool IsBinary)
         {
@@ -54,7 +55,7 @@ namespace SocketIOSharp.Client
 
         private void HandleConnect()
         {
-            CallEventHandler(Event.CONNECTION);
+            CallEventHandler(SocketIOEvent.CONNECTION);
         }
 
         private void HandleDisconnect()
@@ -77,7 +78,7 @@ namespace SocketIOSharp.Client
 
         private void HandleError(SocketIOPacket Packet)
         {
-            CallEventHandler(Event.ERROR, Packet?.JsonData?.ToString() ?? string.Empty);
+            CallEventHandler(SocketIOEvent.ERROR, Packet?.JsonData?.ToString() ?? string.Empty);
         }
 
         private void HandleBinaryEvent(SocketIOPacket Packet)
@@ -133,20 +134,20 @@ namespace SocketIOSharp.Client
             }
         }
 
-        public void On(JToken Event, EventAction Callback)
+        public void On(JToken Event, SocketIOAction.Event Callback)
         {
             if (Event != null)
             {
                 if (!EventHandlers.ContainsKey(Event))
                 {
-                    EventHandlers.TryAdd(Event, new List<EventAction>());
+                    EventHandlers.TryAdd(Event, new List<SocketIOAction.Event>());
                 }
 
                 EventHandlers[Event].Add(Callback);
             }
         }
 
-        public void Off(JToken Event, EventAction Callback)
+        public void Off(JToken Event, SocketIOAction.Event Callback)
         {
             if (Event != null && EventHandlers.ContainsKey(Event))
             {
@@ -154,20 +155,20 @@ namespace SocketIOSharp.Client
             }
         }
 
-        public void On(JToken Event, AckAction Callback)
+        public void On(JToken Event, SocketIOAction.Ack Callback)
         {
             if (Event != null)
             {
                 if (!AckHandlers.ContainsKey(Event))
                 {
-                    AckHandlers.TryAdd(Event, new List<AckAction>());
+                    AckHandlers.TryAdd(Event, new List<SocketIOAction.Ack>());
                 }
 
                 AckHandlers[Event].Add(Callback);
             }
         }
 
-        public void Off(JToken Event, AckAction Callback)
+        public void Off(JToken Event, SocketIOAction.Ack Callback)
         {
             if (Event != null && AckHandlers.ContainsKey(Event))
             {
@@ -196,9 +197,9 @@ namespace SocketIOSharp.Client
         {
             if (Event != null && AckHandlers.ContainsKey(Event))
             {
-                foreach (AckAction AckHandler in AckHandlers[Event])
+                foreach (SocketIOAction.Ack AckHandler in AckHandlers[Event])
                 {
-                    EventAction Callback = null;
+                    SocketIOAction.Event Callback = null;
 
                     if (PacketID >= 0)
                     {
@@ -217,18 +218,11 @@ namespace SocketIOSharp.Client
         {
             if (Event != null && EventHandlers.ContainsKey(Event))
             {
-                foreach (EventAction Callback in EventHandlers[Event])
+                foreach (SocketIOAction.Event EventHandler in EventHandlers[Event])
                 {
-                    Callback(Data);
+                    EventHandler(Data);
                 }
             }
-        }
-
-        public static class Event
-        {
-            public static readonly string CONNECTION = "connection";
-            public static readonly string DISCONNECT = "disconnect";
-            public static readonly string ERROR = "error";
         }
     }
 }
