@@ -1,10 +1,10 @@
-﻿using SocketIOSharp.Common.Manager;
-using System;
+﻿using SocketIOSharp.Abstract;
+using SocketIOSharp.Common.Manager;
 using WebSocketSharp;
 
 namespace SocketIOSharp.Client
 {
-    public partial class SocketIOClient : IDisposable
+    public partial class SocketIOClient : SocketIOConnection
     {
         private readonly ConnctionData ConnectionInformation = new ConnctionData();
         private WebSocket Client = null;
@@ -23,7 +23,6 @@ namespace SocketIOSharp.Client
             }
         }
 
-        public bool JsonOnly { get; set; }
         public bool AutoReconnect { get; set; }
 
         public bool IsAlive
@@ -34,37 +33,12 @@ namespace SocketIOSharp.Client
             }
         }
 
-        private SocketIOAckManager AckManager = null;
-        public bool UseAckTimeout 
+        public SocketIOClient(Scheme Scheme, string Host, int Port, bool JsonOnly = false, bool UseAckTimeout = false, bool AutoReconnect = false) : base(JsonOnly, UseAckTimeout)
         {
-            get 
-            {
-                return AckManager?.UseAckTimeout ?? false;
-            }
-            set 
-            {
-                if (AckManager == null)
-                {
-                    AckManager = new SocketIOAckManager() { AutoRemove = true };
-                }
-
-                if (value)
-                {
-                    AckManager.StartTimer();
-                }
-                else
-                {
-                    AckManager.StopTimer();
-                }
-            }
+            Initialize(Scheme, Host, Port, AutoReconnect);
         }
 
-        public SocketIOClient(Scheme Scheme, string Host, int Port, bool JsonOnly = false, bool AutoReconnect = false, bool UseAckTimeout = false)
-        {
-            Initialize(Scheme, Host, Port, JsonOnly, AutoReconnect, UseAckTimeout);
-        }
-
-        private void Initialize(Scheme Scheme, string Host, int Port, bool JsonOnly, bool AutoReconnect, bool UseAckTimeout)
+        private void Initialize(Scheme Scheme, string Host, int Port, bool AutoReconnect)
         {
             ConnectionInformation.Scheme = Scheme;
             ConnectionInformation.Host = Host;
@@ -97,7 +71,7 @@ namespace SocketIOSharp.Client
             Client.Connect();
         }
 
-        public void Close()
+        public override void Close()
         {
             Client?.Close();
             Client = null;
@@ -107,11 +81,6 @@ namespace SocketIOSharp.Client
 
             StopHeartbeat();
             Reconstructor.Dispose();
-        }
-
-        public void Dispose()
-        {
-            Close();
         }
 
         public enum Scheme

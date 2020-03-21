@@ -4,7 +4,7 @@ using System;
 
 namespace SocketIOSharp.Common.Packet
 {
-    internal class SocketIOAck
+    public class SocketIOAck
     {
         public DateTime RequestedTime { get; private set; }
 

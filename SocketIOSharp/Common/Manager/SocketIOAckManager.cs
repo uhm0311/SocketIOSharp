@@ -7,7 +7,7 @@ using System.Timers;
 
 namespace SocketIOSharp.Common.Manager
 {
-    internal class SocketIOAckManager
+    public class SocketIOAckManager
     {
         private readonly Timer AckTimer = new Timer() { AutoReset = true };
 
@@ -20,7 +20,7 @@ namespace SocketIOSharp.Common.Manager
 
         public bool AutoRemove { get; set; }
 
-        public SocketIOAckManager()
+        internal SocketIOAckManager()
         {
             SetTimeout(TimeoutInMillis);
             UseAckTimeout = false;
