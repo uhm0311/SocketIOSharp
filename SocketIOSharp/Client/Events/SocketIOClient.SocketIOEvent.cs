@@ -69,7 +69,7 @@ namespace SocketIOSharp.Client
 
         private void HandleAck(SocketIOPacket Packet)
         {
-            if (Packet != null && Packet.JsonData != null)
+            if (Packet?.JsonData != null)
             {
                 AckManager.Invoke(Packet.ID, ((JArray)Packet.JsonData).ToArray());
             }
