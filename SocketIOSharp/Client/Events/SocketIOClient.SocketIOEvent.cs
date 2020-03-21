@@ -11,8 +11,8 @@ namespace SocketIOSharp.Client
     partial class SocketIOClient
     {
         private readonly Reconstructor Reconstructor = new Reconstructor();
-        private readonly ConcurrentDictionary<JToken, List<SocketIOEventAction>> EventHandlers = new ConcurrentDictionary<JToken, List<SocketIOEventAction>>();
-        private readonly ConcurrentDictionary<JToken, List<SocketIOAckAction>> AckHandlers = new ConcurrentDictionary<JToken, List<SocketIOAckAction>>();
+        private readonly ConcurrentDictionary<JToken, List<EventAction>> EventHandlers = new ConcurrentDictionary<JToken, List<EventAction>>();
+        private readonly ConcurrentDictionary<JToken, List<AckAction>> AckHandlers = new ConcurrentDictionary<JToken, List<AckAction>>();
 
         private void HandleSocketPacket(SocketIOPacket Packet, bool IsBinary)
         {
@@ -133,20 +133,20 @@ namespace SocketIOSharp.Client
             }
         }
 
-        public void On(JToken Event, SocketIOEventAction Callback)
+        public void On(JToken Event, EventAction Callback)
         {
             if (Event != null)
             {
                 if (!EventHandlers.ContainsKey(Event))
                 {
-                    EventHandlers.TryAdd(Event, new List<SocketIOEventAction>());
+                    EventHandlers.TryAdd(Event, new List<EventAction>());
                 }
 
                 EventHandlers[Event].Add(Callback);
             }
         }
 
-        public void Off(JToken Event, SocketIOEventAction Callback)
+        public void Off(JToken Event, EventAction Callback)
         {
             if (Event != null && EventHandlers.ContainsKey(Event))
             {
@@ -154,20 +154,20 @@ namespace SocketIOSharp.Client
             }
         }
 
-        public void On(JToken Event, SocketIOAckAction Callback)
+        public void On(JToken Event, AckAction Callback)
         {
             if (Event != null)
             {
                 if (!AckHandlers.ContainsKey(Event))
                 {
-                    AckHandlers.TryAdd(Event, new List<SocketIOAckAction>());
+                    AckHandlers.TryAdd(Event, new List<AckAction>());
                 }
 
                 AckHandlers[Event].Add(Callback);
             }
         }
 
-        public void Off(JToken Event, SocketIOAckAction Callback)
+        public void Off(JToken Event, AckAction Callback)
         {
             if (Event != null && AckHandlers.ContainsKey(Event))
             {
@@ -196,19 +196,19 @@ namespace SocketIOSharp.Client
         {
             if (Event != null && AckHandlers.ContainsKey(Event))
             {
-                foreach (SocketIOAckAction Callback in AckHandlers[Event])
+                foreach (AckAction AckHandler in AckHandlers[Event])
                 {
-                    SocketIOEventAction AckAction = null;
+                    EventAction Callback = null;
 
                     if (PacketID >= 0)
                     {
-                        AckAction = (AckData) =>
+                        Callback = (AckData) =>
                         {
                             Emit(SocketIOPacket.Factory.CreateAckPacket(new JArray(AckData), PacketID));
                         };
                     }
 
-                    Callback(Data, AckAction);
+                    AckHandler(Data, Callback);
                 }
             }
         }
@@ -217,7 +217,7 @@ namespace SocketIOSharp.Client
         {
             if (Event != null && EventHandlers.ContainsKey(Event))
             {
-                foreach (SocketIOEventAction Callback in EventHandlers[Event])
+                foreach (EventAction Callback in EventHandlers[Event])
                 {
                     Callback(Data);
                 }

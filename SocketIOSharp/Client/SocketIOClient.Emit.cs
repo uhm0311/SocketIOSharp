@@ -25,14 +25,14 @@ namespace SocketIOSharp.Client
             return Result;
         }
 
-        public void Emit(JToken Event, SocketIOEventAction AckAction = null)
+        public void Emit(JToken Event, EventAction Callback = null)
         {
-            Emit(Event, Arguments(AckAction));
+            Emit(Event, Arguments(Callback));
         }
 
-        public void Emit(JToken Event, JToken Data, SocketIOEventAction AckAction = null)
+        public void Emit(JToken Event, JToken Data, EventAction Callback = null)
         {
-            Emit(Event, Arguments(Data, AckAction));
+            Emit(Event, Arguments(Data, Callback));
         }
 
         public void Emit(JToken Event, params object[] Arguments)
@@ -40,13 +40,13 @@ namespace SocketIOSharp.Client
             if (Event != null)
             {
                 JArray JsonArray = new JArray();
-                SocketIOEventAction AckAction = null;
+                EventAction Callback = null;
                 int ArgumentsCount = Arguments.Length;
 
-                if (ArgumentsCount > 0 && Arguments[Arguments.Length - 1] is SocketIOEventAction)
+                if (ArgumentsCount > 0 && Arguments[Arguments.Length - 1] is EventAction)
                 {
                     ArgumentsCount--;
-                    AckAction = (SocketIOEventAction)Arguments[Arguments.Length - 1];
+                    Callback = (EventAction)Arguments[Arguments.Length - 1];
                 }
 
                 JsonArray.Add(Event);
@@ -61,7 +61,7 @@ namespace SocketIOSharp.Client
                     JsonArray.Add(Data);
                 }
 
-                Emit(SocketIOPacket.Factory.CreateEventPacket(JsonArray, AckManager.CreateAck(AckAction), JsonOnly));
+                Emit(SocketIOPacket.Factory.CreateEventPacket(JsonArray, AckManager.CreateAck(Callback), JsonOnly));
             }
         }
 

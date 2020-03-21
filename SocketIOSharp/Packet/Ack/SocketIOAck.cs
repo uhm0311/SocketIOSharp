@@ -9,19 +9,19 @@ namespace SocketIOSharp.Packet.Ack
         public DateTime RequestedTime { get; private set; }
 
         public int PacketID { get; private set; }
-        public SocketIOEventAction Action { get; private set; }
+        public EventAction Callback { get; private set; }
 
-        internal SocketIOAck(int PacketID, SocketIOEventAction Action = null)
+        internal SocketIOAck(int PacketID, EventAction Callback = null)
         {
             RequestedTime = DateTime.UtcNow;
 
             this.PacketID = PacketID;
-            this.Action = Action;
+            this.Callback = Callback;
         }
 
         public void Invoke(params JToken[] Data)
         {
-            Action(Data);
+            Callback(Data);
         }
 
         public override string ToString()
@@ -30,8 +30,8 @@ namespace SocketIOSharp.Packet.Ack
             (
                 "[Ack: PacketID={0}, RequestedTime={1}, Action={2}]", 
                 PacketID, 
-                RequestedTime, 
-                Action
+                RequestedTime,
+                Callback
             );
         }
     }

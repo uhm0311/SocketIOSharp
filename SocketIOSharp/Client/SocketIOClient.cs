@@ -115,9 +115,8 @@ namespace SocketIOSharp.Client
             Close();
         }
 
-        public delegate void SocketIOEventAction(JToken[] Data);
-        public delegate void SocketIOAckAction(JToken[] Data, SocketIOEventAction Action);
-        
+        public delegate void EventAction(JToken[] Data);
+        public delegate void AckAction(JToken[] Data, EventAction Callback);
 
         public enum Scheme
         {

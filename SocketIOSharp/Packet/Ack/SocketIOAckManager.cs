@@ -71,9 +71,9 @@ namespace SocketIOSharp.Packet.Ack
             }
         }
 
-        public SocketIOAck CreateAck(SocketIOEventAction AckAction = null)
+        public SocketIOAck CreateAck(EventAction Callback = null)
         {
-            if (AckAction != null)
+            if (Callback != null)
             {
                 lock (AckMutex)
                 {
@@ -83,12 +83,12 @@ namespace SocketIOSharp.Packet.Ack
                         {
                             if (AckList[i] == null)
                             {
-                                return (AckList[i] = new SocketIOAck(i, AckAction));
+                                return (AckList[i] = new SocketIOAck(i, Callback));
                             }
                         }
                         else
                         {
-                            SocketIOAck Ack = new SocketIOAck(AckList.Count, AckAction);
+                            SocketIOAck Ack = new SocketIOAck(AckList.Count, Callback);
                             AckList.Add(Ack);
 
                             return Ack;
