@@ -5,91 +5,86 @@ namespace SocketIOSharp.Common.Packet
 {
     partial class SocketIOPacket
     {
-        internal class Factory
+        internal static SocketIOPacket CreateConnectionPacket()
         {
-            public static SocketIOPacket CreatePingPacket()
+            return new SocketIOPacket()
             {
-                return new SocketIOPacket() { EnginePacketType = EngineIOPacketType.PING };
+                Type = SocketIOPacketType.CONNECT,
+                IsJson = true
+            };
+        }
+
+        internal static SocketIOPacket CreateEventPacket(JArray JsonArray, SocketIOAck Ack)
+        {
+            SocketIOPacket Packet = CreateMessagePacket(JsonArray, Ack);
+
+            if (Packet.IsJson)
+            {
+                Packet.Type = SocketIOPacketType.EVENT;
+            }
+            else
+            {
+                Packet.Type = SocketIOPacketType.BINARY_EVENT;
             }
 
-            public static SocketIOPacket CreatePongPacket()
-            {
-                return new SocketIOPacket() { EnginePacketType = EngineIOPacketType.PONG };
-            }
+            Packet.IsJson = true;
+            return Packet;
+        }
 
-            public static SocketIOPacket CreateEventPacket(JArray JsonArray, SocketIOAck Ack, bool JsonOnly)
+        internal static SocketIOPacket CreateAckPacket(JArray JsonArray, int PacketID)
+        {
+            if (PacketID >= 0)
             {
-                SocketIOPacket Packet = CreateMessagePacket(JsonArray, Ack, JsonOnly);
+                SocketIOPacket Packet = CreateMessagePacket(JsonArray, PacketID);
 
                 if (Packet.IsJson)
                 {
-                    Packet.SocketPacketType = SocketIOPacketType.EVENT;
+                    Packet.Type = SocketIOPacketType.ACK;
                 }
                 else
                 {
-                    Packet.SocketPacketType = SocketIOPacketType.BINARY_EVENT;
+                    Packet.Type = SocketIOPacketType.BINARY_ACK;
                 }
 
                 Packet.IsJson = true;
                 return Packet;
             }
-
-            public static SocketIOPacket CreateAckPacket(JArray JsonArray, int PacketID)
+            else
             {
-                if (PacketID >= 0)
-                {
-                    SocketIOPacket Packet = CreateMessagePacket(JsonArray, PacketID, false);
+                return null;
+            }
+        }
 
-                    if (Packet.IsJson)
-                    {
-                        Packet.SocketPacketType = SocketIOPacketType.ACK;
-                    }
-                    else
-                    {
-                        Packet.SocketPacketType = SocketIOPacketType.BINARY_ACK;
-                    }
+        private static SocketIOPacket CreateMessagePacket(JArray JsonArray, SocketIOAck Ack)
+        {
+            return CreateMessagePacket(JsonArray, Ack == null ? -1 : Ack.PacketID);
+        }
 
-                    Packet.IsJson = true;
-                    return Packet;
-                }
-                else
+        private static SocketIOPacket CreateMessagePacket(JArray JsonArray, int PacketID)
+        {
+            SocketIOPacket Packet = new SocketIOPacket
+            {
+                JsonData = JsonArray,
+                IsJson = true
+            };
+
+            if (PacketID >= 0)
+            {
+                Packet.ID = PacketID;
+            }
+
+            using (Deconstructor Deconstructor = new Deconstructor())
+            {
+                Deconstructor.SetPacket(Packet);
+                Packet = Deconstructor.Deconstruct();
+
+                if (Packet.Attachments.Count > 0)
                 {
-                    return null;
+                    Packet.IsJson = false;
                 }
             }
 
-            private static SocketIOPacket CreateMessagePacket(JArray JsonArray, SocketIOAck Ack, bool JsonOnly)
-            {
-                return CreateMessagePacket(JsonArray, Ack == null ? -1 : Ack.PacketID, JsonOnly);
-            }
-
-            private static SocketIOPacket CreateMessagePacket(JArray JsonArray, int PacketID, bool JsonOnly)
-            {
-                SocketIOPacket Packet = new SocketIOPacket() { EnginePacketType = EngineIOPacketType.MESSAGE };
-                Packet.JsonData = JsonArray;
-                Packet.IsJson = true;
-
-                if (PacketID >= 0)
-                {
-                    Packet.ID = PacketID;
-                }
-
-                if (!JsonOnly)
-                {
-                    using (Deconstructor Deconstructor = new Deconstructor())
-                    {
-                        Deconstructor.SetPacket(Packet);
-                        Packet = Deconstructor.Deconstruct();
-
-                        if (Packet.Attachments.Count > 0)
-                        {
-                            Packet.IsJson = false;
-                        }
-                    }
-                }
-
-                return Packet;
-            }
+            return Packet;
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json.Linq;
-using SocketIOSharp.Common.Action;
 using SocketIOSharp.Common.Packet;
 using System;
 using System.Collections.Generic;
@@ -72,7 +71,7 @@ namespace SocketIOSharp.Common.Manager
             }
         }
 
-        public SocketIOAck CreateAck(SocketIOAction.Event Callback = null)
+        public SocketIOAck CreateAck(Action<JToken[]> Callback = null)
         {
             if (Callback != null)
             {

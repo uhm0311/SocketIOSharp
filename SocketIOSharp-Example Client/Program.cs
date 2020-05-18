@@ -1,16 +1,17 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using EngineIOSharp.Common.Enum;
+using Newtonsoft.Json.Linq;
 using SocketIOSharp.Client;
 using SocketIOSharp.Common;
 using System;
 
-namespace SocketIOSharp.Example
+namespace SocketIOSharp.Example.Client
 {
     class Program
     {
         static void Main(string[] args)
         {
-            SocketIOClient client = new SocketIOClient(SocketIOClient.Scheme.ws, "127.0.0.1", 9001);
-            InitEventHandlers(client);
+            SocketIOClient client = new SocketIOClient(new SocketIOClientOption(EngineIOScheme.http, "localhost", 9001));
+            InitEventHandlers(client);            
 
             client.Connect();
             Console.WriteLine("Input /exit to close connection.");

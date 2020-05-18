@@ -1,12 +1,11 @@
 ﻿using Newtonsoft.Json.Linq;
-using SocketIOSharp.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace SocketIOSharp.Common.Packet.Binary.Constructors
 {
-    internal abstract class Constructor : IDisposable
+    public abstract class Constructor : IDisposable
     {
         protected delegate bool Condition(JToken JsonData);
 
@@ -100,7 +99,7 @@ namespace SocketIOSharp.Common.Packet.Binary.Constructors
                 }
                 else
                 {
-                    throw new SocketIOClientException("Invalid placeholder parent type: " + ConstructeeTokenParent.Type);
+                    throw new SocketIOException("Invalid placeholder parent type: " + ConstructeeTokenParent.Type);
                 }
 
                 return ConstructeeTokenParent;

@@ -1,14 +1,14 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace SocketIOSharp.Common.Packet
 {
-    internal partial class SocketIOPacket
+    public partial class SocketIOPacket
     {
-        public EngineIOPacketType EnginePacketType { get; private set; }
-        public SocketIOPacketType SocketPacketType { get; private set; }
+        public SocketIOPacketType Type { get; private set; }
 
         public Queue<SocketIOPacket> Attachments { get; private set; }
         public string Namespace { get; private set; }
@@ -18,12 +18,11 @@ namespace SocketIOSharp.Common.Packet
         public bool IsBinary { get; private set; }
 
         public JToken JsonData { get; set; }
-        public byte[] BinaryData { get; private set; }
+        public byte[] RawData { get; private set; }
 
         private SocketIOPacket()
         {
-            EnginePacketType = EngineIOPacketType.UNKNOWN;
-            SocketPacketType = SocketIOPacketType.UNKNOWN;
+            Type = SocketIOPacketType.UNKNOWN;
 
             Attachments = new Queue<SocketIOPacket>();
             Namespace = "/";
@@ -33,13 +32,12 @@ namespace SocketIOSharp.Common.Packet
             IsBinary = false;
 
             JsonData = null;
-            BinaryData = null;
+            RawData = null;
         }
 
         private SocketIOPacket(SocketIOPacket Packet)
         {
-            EnginePacketType = Packet.EnginePacketType;
-            SocketPacketType = Packet.SocketPacketType;
+            Type = Packet.Type;
 
             if (Packet.Attachments != null)
             {
@@ -65,13 +63,13 @@ namespace SocketIOSharp.Common.Packet
                 JsonData = null;
             }
 
-            if (Packet.BinaryData != null)
+            if (Packet.RawData != null)
             {
-                BinaryData = new List<byte>(Packet.BinaryData).ToArray();
+                RawData = new List<byte>(Packet.RawData).ToArray();
             }
             else
             {
-                BinaryData = null;
+                RawData = null;
             }
         }
 
@@ -84,9 +82,8 @@ namespace SocketIOSharp.Common.Packet
         {
             StringBuilder Builder = new StringBuilder(string.Format
             (
-                "Packet: EnginePacketType={0}, SocketPacketType={1}, ", 
-                EnginePacketType, 
-                SocketPacketType
+                "Packet: SocketPacketType={0}, ", 
+                Type
             ));
 
             if (Attachments != null && Attachments.Count > 0)
@@ -108,12 +105,65 @@ namespace SocketIOSharp.Common.Packet
                 Builder.Append(string.Format(", JsonData={0}", JsonData));
             }
 
-            if (BinaryData != null)
+            if (RawData != null)
             {
-                Builder.Append(string.Format(", BinaryData={0}", BitConverter.ToString(BinaryData)));
+                Builder.Append(string.Format(", BinaryData={0}", BitConverter.ToString(RawData)));
             }
 
             return Builder.ToString();
+        }
+
+        internal object Encode()
+        {
+            try
+            {
+                if (IsJson)
+                {
+                    StringBuilder Builder = new StringBuilder();
+
+                    if (Type != SocketIOPacketType.UNKNOWN)
+                    {
+                        Builder.Append((int)Type);
+                    }
+
+                    if (Type == SocketIOPacketType.BINARY_EVENT || Type == SocketIOPacketType.BINARY_ACK)
+                    {
+                        Builder.Append(Attachments.Count);
+                        Builder.Append('-');
+                    }
+
+                    if (!string.IsNullOrEmpty(Namespace) && !Namespace.Equals("/"))
+                    {
+                        Builder.Append(Namespace);
+                        Builder.Append(',');
+                    }
+
+                    if (ID > -1)
+                    {
+                        Builder.Append(ID);
+                    }
+
+                    return Builder.Append(JsonData?.ToString(Formatting.None) ?? string.Empty).ToString();
+                }
+                else
+                {
+                    if (Type != SocketIOPacketType.UNKNOWN)
+                    {
+                        List<byte> Buffer = new List<byte>() { (byte)Type };
+                        Buffer.AddRange(RawData);
+
+                        return Buffer.ToArray();
+                    }
+                    else
+                    {
+                        return RawData;
+                    }
+                }
+            }
+            catch (Exception Exception)
+            {
+                throw new SocketIOException("Packet encoding failed. " + this, Exception);
+            }
         }
     }
 }

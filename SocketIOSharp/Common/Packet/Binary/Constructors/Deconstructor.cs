@@ -1,13 +1,16 @@
 ﻿using Newtonsoft.Json.Linq;
-using SocketIOSharp.Client;
 using System;
-using System.Collections.Generic;
 
 namespace SocketIOSharp.Common.Packet.Binary.Constructors
 {
-    internal class Deconstructor : Constructor
+    public class Deconstructor : Constructor
     {
         private int PlaceholderCount = 0;
+
+        internal Deconstructor()
+        {
+
+        }
 
         public override void SetPacket(SocketIOPacket ConstructeePacket)
         {
@@ -28,7 +31,7 @@ namespace SocketIOSharp.Common.Packet.Binary.Constructors
 
                 if (PlaceholderCount > 0)
                 {
-                    throw new SocketIOClientException("Bytes token count is not match to placeholder count. " + this);
+                    throw new SocketIOException("Bytes token count is not match to placeholder count. " + this);
                 }
             }
         }
@@ -40,7 +43,7 @@ namespace SocketIOSharp.Common.Packet.Binary.Constructors
             while (ConstructeeTokenCount > 0)
             {
                 JToken Parent = DequeueConstructeeTokenParent(out object Key);
-                ConstructeePacket.Attachments.Enqueue(SocketIOPacket.Decode(EngineIOPacketType.MESSAGE, (byte[])Parent[Key]));
+                ConstructeePacket.Attachments.Enqueue(SocketIOPacket.Decode((byte[])Parent[Key]));
 
                 Parent[Key] = new JObject
                 {

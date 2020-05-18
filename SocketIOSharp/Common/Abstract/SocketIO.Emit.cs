@@ -1,10 +1,10 @@
 ﻿using Newtonsoft.Json.Linq;
-using SocketIOSharp.Common.Action;
 using SocketIOSharp.Common.Packet;
+using System;
 
-namespace SocketIOSharp.Abstract
+namespace SocketIOSharp.Common.Abstract
 {
-    partial class SocketIOConnection
+    partial class SocketIO
     {
         private object[] Arguments(params object[] Arguments)
         {
@@ -25,12 +25,12 @@ namespace SocketIOSharp.Abstract
             return Result;
         }
 
-        public void Emit(JToken Event, SocketIOAction.Event Callback = null)
+        public void Emit(JToken Event, Action<JToken[]> Callback = null)
         {
             Emit(Event, Arguments(Callback));
         }
 
-        public void Emit(JToken Event, JToken Data, SocketIOAction.Event Callback = null)
+        public void Emit(JToken Event, JToken Data, Action<JToken[]> Callback = null)
         {
             Emit(Event, Arguments(Data, Callback));
         }
@@ -40,13 +40,13 @@ namespace SocketIOSharp.Abstract
             if (Event != null)
             {
                 JArray JsonArray = new JArray();
-                SocketIOAction.Event Callback = null;
+                Action<JToken[]> Callback = null;
                 int ArgumentsCount = Arguments.Length;
 
-                if (ArgumentsCount > 0 && Arguments[Arguments.Length - 1] is SocketIOAction.Event)
+                if (ArgumentsCount > 0 && Arguments[Arguments.Length - 1] is Action<JToken[]>)
                 {
                     ArgumentsCount--;
-                    Callback = (SocketIOAction.Event)Arguments[Arguments.Length - 1];
+                    Callback = (Action<JToken[]>)Arguments[Arguments.Length - 1];
                 }
 
                 JsonArray.Add(Event);
@@ -61,10 +61,34 @@ namespace SocketIOSharp.Abstract
                     JsonArray.Add(Data);
                 }
 
-                Emit(SocketIOPacket.Factory.CreateEventPacket(JsonArray, AckManager.CreateAck(Callback), JsonOnly));
+                Emit(SocketIOPacket.CreateEventPacket(JsonArray, AckManager.CreateAck(Callback)));
             }
         }
 
-        internal abstract void Emit(SocketIOPacket Packet);
+        internal void Emit(SocketIOPacket Packet)
+        {
+            if (Packet != null)
+            {
+                object Encoded = Packet.Encode();
+
+                if (Packet.IsJson)
+                {
+                    Emit((string)Encoded);
+                }
+                else
+                {
+                    Emit((byte[])Encoded);
+                }
+
+                foreach (SocketIOPacket Attachment in Packet.Attachments)
+                {
+                    Emit(Attachment);
+                }
+            }
+        }
+
+        protected abstract void Emit(string Data);
+
+        protected abstract void Emit(byte[] RawData);
     }
 }

@@ -1,11 +1,15 @@
 ﻿using Newtonsoft.Json.Linq;
-using SocketIOSharp.Client;
 using System;
 
 namespace SocketIOSharp.Common.Packet.Binary.Constructors
 {
-    internal class Reconstructor : Constructor
+    public class Reconstructor : Constructor
     {
+        internal Reconstructor() 
+        { 
+
+        }
+
         public override void SetPacket(SocketIOPacket ConstructeePacket)
         {
             if (ConstructeePacket != null)
@@ -22,7 +26,7 @@ namespace SocketIOSharp.Common.Packet.Binary.Constructors
 
                 if (ConstructeePacket.Attachments.Count != ConstructeeTokenCount)
                 {
-                    throw new SocketIOClientException("Attachment count is not match to placeholder count. " + this);
+                    throw new SocketIOException("Attachment count is not match to placeholder count. " + this);
                 }
             }
         }

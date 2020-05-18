@@ -1,6 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using EngineIOSharp.Common.Packet;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using SocketIOSharp.Client;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,62 +9,48 @@ namespace SocketIOSharp.Common.Packet
 {
     partial class SocketIOPacket
     {
-        public static SocketIOPacket Decode(byte[] RawData)
+        internal static SocketIOPacket Decode(EngineIOPacket EngineIOPacket)
         {
-            try
+            if ((EngineIOPacket?.Type ?? EngineIOPacketType.UNKNOWN) == EngineIOPacketType.MESSAGE)
             {
-                SocketIOPacket Packet = new SocketIOPacket();
-                Queue<byte> BufferQueue = new Queue<byte>(RawData);
-
-                return Decode((EngineIOPacketType)BufferQueue.Dequeue(), BufferQueue.ToArray());
-            }
-            catch (Exception ex)
-            {
-                StringBuilder Builder = new StringBuilder();
-
-                if (RawData != null)
+                try
                 {
-                    Builder.Append(BitConverter.ToString(RawData));
+                    if (EngineIOPacket.IsText)
+                    {
+                        return Decode(EngineIOPacket.Data);
+                    } 
+                    else
+                    {
+                        return Decode(EngineIOPacket.RawData);
+                    }
                 }
-
-                throw new SocketIOClientException("Packet decoding failed. " + Builder, ex);
+                catch (Exception Exception)
+                {
+                    throw new SocketIOException("Packet decoding failed. " + EngineIOPacket, Exception);
+                }
+            }
+            else
+            {
+                throw new SocketIOException("Type of Engine.IO packet is not message.");
             }
         }
 
-        public static SocketIOPacket Decode(EngineIOPacketType EnginePacketType, byte[] BinaryData)
+        internal static SocketIOPacket Decode(string Data)
         {
-            return new SocketIOPacket
+            SocketIOPacket Packet = new SocketIOPacket();
+            int Offset = 0;
+
+            Packet.Type = (SocketIOPacketType)(Data[Offset] - '0');
+
+            if (Data.Length > 1)
             {
-                EnginePacketType = EnginePacketType,
-                BinaryData = new List<byte>(BinaryData).ToArray(),
-                IsBinary = true
-            };
-        }
-
-        public static SocketIOPacket Decode(string PacketString)
-        {
-            try
-            {
-                SocketIOPacket Packet = new SocketIOPacket();
-                int Offset = 0;
-
-                if ((Packet.EnginePacketType = (EngineIOPacketType)(PacketString[Offset] - '0')) == EngineIOPacketType.MESSAGE)
-                {
-                    Packet.SocketPacketType = (SocketIOPacketType)(PacketString[++Offset] - '0');
-                }
-
-                if (PacketString.Length <= 2)
-                {
-                    return Packet;
-                }
-
-                if (Packet.SocketPacketType == SocketIOPacketType.BINARY_EVENT || Packet.SocketPacketType == SocketIOPacketType.BINARY_ACK)
+                if (Packet.Type == SocketIOPacketType.BINARY_EVENT || Packet.Type == SocketIOPacketType.BINARY_ACK)
                 {
                     StringBuilder Builder = new StringBuilder();
 
-                    while (Offset < PacketString.Length - 1)
+                    while (Offset < Data.Length - 1)
                     {
-                        char c = PacketString[++Offset];
+                        char c = Data[++Offset];
 
                         if (char.IsNumber(c))
                         {
@@ -79,13 +65,13 @@ namespace SocketIOSharp.Common.Packet
                     Packet.Attachments = new Queue<SocketIOPacket>(new SocketIOPacket[int.Parse(Builder.ToString())]);
                 }
 
-                if ('/' == PacketString[Offset + 1])
+                if ('/' == Data[Offset + 1])
                 {
                     StringBuilder Builder = new StringBuilder();
 
-                    while (Offset < PacketString.Length - 1 && PacketString[++Offset] != ',')
+                    while (Offset < Data.Length - 1 && Data[++Offset] != ',')
                     {
-                        Builder.Append(PacketString[Offset]);
+                        Builder.Append(Data[Offset]);
                     }
 
                     Packet.Namespace = Builder.ToString();
@@ -95,15 +81,15 @@ namespace SocketIOSharp.Common.Packet
                     Packet.Namespace = "/";
                 }
 
-                char Next = PacketString[Offset + 1];
+                char Next = Data[Offset + 1];
 
                 if (!char.IsWhiteSpace(Next) && char.IsNumber(Next))
                 {
                     StringBuilder Builder = new StringBuilder();
 
-                    while (Offset < PacketString.Length - 1)
+                    while (Offset < Data.Length - 1)
                     {
-                        char c = PacketString[++Offset];
+                        char c = Data[++Offset];
 
                         if (char.IsNumber(c))
                         {
@@ -119,18 +105,24 @@ namespace SocketIOSharp.Common.Packet
                     Packet.ID = int.Parse(Builder.ToString());
                 }
 
-                if (++Offset < PacketString.Length - 1)
+                if (++Offset < Data.Length - 1)
                 {
-                    Packet.JsonData = (JToken)JsonConvert.DeserializeObject(PacketString.Substring(Offset));
+                    Packet.JsonData = (JToken)JsonConvert.DeserializeObject(Data.Substring(Offset));
                     Packet.IsJson = true;
                 }
+            }
 
-                return Packet;
-            }
-            catch (Exception ex)
+            return Packet;
+        }
+
+        internal static SocketIOPacket Decode(byte[] RawData)
+        {
+            return new SocketIOPacket()
             {
-                throw new SocketIOClientException("Packet decoding failed. " + PacketString, ex);
-            }
+                RawData = RawData,
+                IsJson = false,
+                IsBinary = true
+            };
         }
     }
 }

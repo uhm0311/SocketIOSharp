@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json.Linq;
-using SocketIOSharp.Common.Action;
 using System;
 
 namespace SocketIOSharp.Common.Packet
@@ -9,9 +8,9 @@ namespace SocketIOSharp.Common.Packet
         public DateTime RequestedTime { get; private set; }
 
         public int PacketID { get; private set; }
-        public SocketIOAction.Event Callback { get; private set; }
+        public Action<JToken[]> Callback { get; private set; }
 
-        internal SocketIOAck(int PacketID, SocketIOAction.Event Callback = null)
+        internal SocketIOAck(int PacketID, Action<JToken[]> Callback = null)
         {
             RequestedTime = DateTime.UtcNow;
 
