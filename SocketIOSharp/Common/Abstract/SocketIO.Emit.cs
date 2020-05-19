@@ -4,7 +4,7 @@ using System;
 
 namespace SocketIOSharp.Common.Abstract
 {
-    partial class SocketIO
+    partial class SocketIO<TChildClass>
     {
         private object[] Arguments(params object[] Arguments)
         {
@@ -25,17 +25,17 @@ namespace SocketIOSharp.Common.Abstract
             return Result;
         }
 
-        public void Emit(JToken Event, Action<JToken[]> Callback = null)
+        public TChildClass Emit(JToken Event, Action<JToken[]> Callback = null)
         {
-            Emit(Event, Arguments(Callback));
+            return Emit(Event, Arguments(Callback));
         }
 
-        public void Emit(JToken Event, JToken Data, Action<JToken[]> Callback = null)
+        public TChildClass Emit(JToken Event, JToken Data, Action<JToken[]> Callback = null)
         {
-            Emit(Event, Arguments(Data, Callback));
+            return Emit(Event, Arguments(Data, Callback));
         }
 
-        public void Emit(JToken Event, params object[] Arguments)
+        public TChildClass Emit(JToken Event, params object[] Arguments)
         {
             if (Event != null)
             {
@@ -63,9 +63,11 @@ namespace SocketIOSharp.Common.Abstract
 
                 Emit(SocketIOPacket.CreateEventPacket(JsonArray, AckManager.CreateAck(Callback)));
             }
+
+            return this as TChildClass;
         }
 
-        internal void Emit(SocketIOPacket Packet)
+        internal TChildClass Emit(SocketIOPacket Packet)
         {
             if (Packet != null)
             {
@@ -85,10 +87,12 @@ namespace SocketIOSharp.Common.Abstract
                     Emit(Attachment);
                 }
             }
+
+            return this as TChildClass;
         }
 
-        protected abstract void Emit(string Data);
+        protected abstract TChildClass Emit(string Data);
 
-        protected abstract void Emit(byte[] RawData);
+        protected abstract TChildClass Emit(byte[] RawData);
     }
 }

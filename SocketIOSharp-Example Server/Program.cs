@@ -28,7 +28,7 @@ namespace SocketIOSharp.Example.Server
                         socket.Emit("echo", data);
                     });
 
-                    socket.On(SocketIOEvent.DISCONNECT, (data) =>
+                    socket.On(SocketIOEvent.DISCONNECT, () =>
                     {
                         Console.WriteLine("Client disconnected!");
                     });

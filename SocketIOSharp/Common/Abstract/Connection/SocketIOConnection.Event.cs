@@ -1,193 +1,81 @@
-﻿using EngineIOSharp.Common.Packet;
+﻿using EmitterSharp;
 using Newtonsoft.Json.Linq;
-using SocketIOSharp.Common;
 using SocketIOSharp.Common.Packet;
 using SocketIOSharp.Common.Packet.Binary.Constructors;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace SocketIOSharp.Common.Abstract.Connection
 {
-    partial class SocketIOConnection
+    partial class SocketIOConnection<TChildClass>
     {
-        protected bool Closed = false;
-
         protected readonly Reconstructor Reconstructor = new Reconstructor();
-        private readonly ConcurrentDictionary<JToken, List<Action<JToken[]>>> EventHandlers = new ConcurrentDictionary<JToken, List<Action<JToken[]>>>();
-        private readonly ConcurrentDictionary<JToken, List<Action<JToken[], Action<JToken[]>>>> AckHandlers = new ConcurrentDictionary<JToken, List<Action<JToken[], Action<JToken[]>>>>();
 
-        protected void OnPacket(EngineIOPacket Packet)
+        private readonly SocketIOEventHandlerManager EventHandlerManager = new SocketIOEventHandlerManager();
+        private readonly SocketIOAckEventHandlerManager AckEventHandlerManager = new SocketIOAckEventHandlerManager();
+
+        public TChildClass On(JToken Event, Action Callback)
         {
-            OnPacket(SocketIOPacket.Decode(Packet));
+            EventHandlerManager.On(Event, Callback);
+
+            return this as TChildClass;
         }
 
-        private void OnPacket(SocketIOPacket Packet)
+        public TChildClass On(JToken Event, Action<JToken[]> Callback)
         {
-            switch (Packet.Type)
-            {
-                case SocketIOPacketType.CONNECT:
-                    OnConnect();
-                    break;
+            EventHandlerManager.On(Event, Callback);
 
-                case SocketIOPacketType.DISCONNECT:
-                    OnDisconnect();
-                    break;
-
-                case SocketIOPacketType.EVENT:
-                    OnEvent(Packet);
-                    break;
-
-                case SocketIOPacketType.ACK:
-                    OnAck(Packet);
-                    break;
-
-                case SocketIOPacketType.ERROR:
-                    OnError(Packet);
-                    break;
-
-                case SocketIOPacketType.BINARY_EVENT:
-                    OnBinaryEvent(Packet);
-                    break;
-
-                case SocketIOPacketType.BINARY_ACK:
-                    OnBinaryAck(Packet);
-                    break;
-
-                default:
-                    OnEtc(Packet);
-                    break;
-            }
+            return this as TChildClass;
         }
 
-        private void OnConnect()
+        public TChildClass Once(JToken Event, Action Callback)
         {
-            CallEventHandler(SocketIOEvent.CONNECTION);
+            EventHandlerManager.Once(Event, Callback);
+
+            return this as TChildClass;
         }
 
-        protected void OnDisconnect()
+        public TChildClass Once(JToken Event, Action<JToken[]> Callback)
         {
-            if (!Closed)
-            {
-                Closed = true;
+            EventHandlerManager.Once(Event, Callback);
 
-                CallEventHandler(SocketIOEvent.DISCONNECT);
-                Close();
-            }
+            return this as TChildClass;
         }
 
-        private void OnEvent(SocketIOPacket Packet)
+        public TChildClass Off(JToken Event, Action Callback)
         {
-            CallHandler(Packet);
+            EventHandlerManager.Off(Event, Callback);
+
+            return this as TChildClass;
         }
 
-        private void OnAck(SocketIOPacket Packet)
+        public TChildClass Off(JToken Event, Action<JToken[]> Callback)
         {
-            if (Packet?.JsonData != null)
-            {
-                AckManager.Invoke(Packet.ID, ((JArray)Packet.JsonData).ToArray());
-            }
+            EventHandlerManager.Off(Event, Callback);
+
+            return this as TChildClass;
         }
 
-        private void OnError(SocketIOPacket Packet)
+        public TChildClass On(JToken Event, Action<SocketIOAckEvent> Callback)
         {
-            CallEventHandler(SocketIOEvent.ERROR, Packet?.JsonData?.ToString() ?? string.Empty);
+            AckEventHandlerManager.On(Event, Callback);
+
+            return this as TChildClass;
         }
 
-        private void OnBinaryEvent(SocketIOPacket Packet)
+        public TChildClass Once(JToken Event, Action<SocketIOAckEvent> Callback)
         {
-            OnBinaryPacket(Packet);
+            AckEventHandlerManager.Once(Event, Callback);
+
+            return this as TChildClass;
         }
 
-        private void OnBinaryAck(SocketIOPacket Packet)
+        public TChildClass Off(JToken Event, Action<SocketIOAckEvent> Callback)
         {
-            OnBinaryPacket(Packet);
-        }
+            AckEventHandlerManager.Off(Event, Callback);
 
-        private void OnBinaryPacket(SocketIOPacket Packet)
-        {
-            if (Packet != null && Reconstructor.ConstructeeTokenCount == 0)
-            {
-                Reconstructor.SetPacket(Packet);
-            }
-            else
-            {
-                throw new SocketIOException(string.Format
-                (
-                    "Unexpected binary data: {0}. Reconstructor: {1}.",
-                    Packet,
-                    Reconstructor.OriginalPacket
-                ));
-            }
-        }
-
-        private void OnEtc(SocketIOPacket Packet)
-        {
-            if (Packet != null)
-            {
-                if (Reconstructor.ConstructeeTokenCount > 0)
-                {
-                    SocketIOPacket ReconstructedPacket = Reconstructor.Reconstruct(Packet.RawData);
-
-                    if (Reconstructor.ConstructeeTokenCount == 0)
-                    {
-                        using (Reconstructor)
-                        {
-                            if (ReconstructedPacket.ID >= 0)
-                            {
-                                OnAck(ReconstructedPacket);
-                            }
-                            else
-                            {
-                                OnEvent(ReconstructedPacket);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        public void On(JToken Event, Action<JToken[]> Callback)
-        {
-            if (Event != null)
-            {
-                if (!EventHandlers.ContainsKey(Event))
-                {
-                    EventHandlers.TryAdd(Event, new List<Action<JToken[]>>());
-                }
-
-                EventHandlers[Event].Add(Callback);
-            }
-        }
-
-        public void Off(JToken Event, Action<JToken[]> Callback)
-        {
-            if (Event != null && EventHandlers.ContainsKey(Event))
-            {
-                EventHandlers[Event].Remove(Callback);
-            }
-        }
-
-        public void On(JToken Event, Action<JToken[], Action<JToken[]>> Callback)
-        {
-            if (Event != null)
-            {
-                if (!AckHandlers.ContainsKey(Event))
-                {
-                    AckHandlers.TryAdd(Event, new List<Action<JToken[], Action<JToken[]>>>());
-                }
-
-                AckHandlers[Event].Add(Callback);
-            }
-        }
-
-        public void Off(JToken Event, Action<JToken[], Action<JToken[]>> Callback)
-        {
-            if (Event != null && AckHandlers.ContainsKey(Event))
-            {
-                AckHandlers[Event].Remove(Callback);
-            }
+            return this as TChildClass;
         }
 
         private void CallHandler(SocketIOPacket Packet)
@@ -202,41 +90,45 @@ namespace SocketIOSharp.Common.Abstract.Connection
                     JToken[] Data = Temp.ToArray();
 
                     CallEventHandler(Event, Data);
-                    CallAckHandler(Event, Packet.ID, Data);
+                    CallAckEventHandler(Event, Packet.ID, Data);
                 }
             }
         }
 
-        private void CallAckHandler(JToken Event, int PacketID, params JToken[] Data)
+        private void CallAckEventHandler(JToken Event, int PacketID, params JToken[] Data)
         {
-            if (Event != null && AckHandlers.ContainsKey(Event))
+            if (Event != null)
             {
-                foreach (Action<JToken[], Action<JToken[]>> AckHandler in AckHandlers[Event])
-                {
-                    Action<JToken[]> Callback = null;
+                Action<JToken[]> Callback = null;
 
-                    if (PacketID >= 0)
+                if (PacketID >= 0)
+                {
+                    Callback = (AckData) =>
                     {
-                        Callback = (AckData) =>
-                        {
-                            Emit(SocketIOPacket.CreateAckPacket(new JArray(AckData), PacketID));
-                        };
-                    }
-
-                    AckHandler(Data, Callback);
+                        Emit(SocketIOPacket.CreateAckPacket(new JArray(AckData), PacketID));
+                    };
                 }
+
+                AckEventHandlerManager.Emit(Event, new SocketIOAckEvent(Data, Callback));
             }
         }
 
-        private void CallEventHandler(JToken Event, params JToken[] Data)
+        protected void CallEventHandler(JToken Event, params JToken[] Data)
         {
-            if (Event != null && EventHandlers.ContainsKey(Event))
+            if (Event != null)
             {
-                foreach (Action<JToken[]> EventHandler in EventHandlers[Event])
-                {
-                    EventHandler(Data);
-                }
+                EventHandlerManager.Emit(Event, Data);
             }
+        }
+
+        private class SocketIOEventHandlerManager : Emitter<SocketIOEventHandlerManager, JToken, JToken[]>
+        {
+            
+        }
+
+        private class SocketIOAckEventHandlerManager : Emitter<SocketIOAckEventHandlerManager, JToken, SocketIOAckEvent>
+        {
+
         }
     }
 }

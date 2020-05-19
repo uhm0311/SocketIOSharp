@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
+using SimpleThreadMonitor;
 using SocketIOSharp.Common.Packet;
 using System;
 using System.Collections.Generic;
@@ -26,7 +27,7 @@ namespace SocketIOSharp.Common.Manager
 
             AckTimer.Elapsed += (sender, e) =>
             {
-                lock (AckMutex)
+                SimpleMutex.Lock(AckMutex, () =>
                 {
                     for (int i = 0; UseAckTimeout && i < AckList.Count; i++)
                     {
@@ -35,7 +36,7 @@ namespace SocketIOSharp.Common.Manager
                             AckList[i] = null;
                         }
                     }
-                }
+                });
             };
         }
 
@@ -75,7 +76,9 @@ namespace SocketIOSharp.Common.Manager
         {
             if (Callback != null)
             {
-                lock (AckMutex)
+                SocketIOAck Result = null;
+
+                SimpleMutex.Lock(AckMutex, () =>
                 {
                     for (int i = 0; true; i++)
                     {
@@ -83,7 +86,7 @@ namespace SocketIOSharp.Common.Manager
                         {
                             if (AckList[i] == null)
                             {
-                                return (AckList[i] = new SocketIOAck(i, Callback));
+                                Result = AckList[i] = new SocketIOAck(i, Callback);
                             }
                         }
                         else
@@ -91,10 +94,12 @@ namespace SocketIOSharp.Common.Manager
                             SocketIOAck Ack = new SocketIOAck(AckList.Count, Callback);
                             AckList.Add(Ack);
 
-                            return Ack;
+                            Result = Ack;
                         }
                     }
-                }
+                });
+
+                return Result;
             }
             else
             {
@@ -104,7 +109,7 @@ namespace SocketIOSharp.Common.Manager
 
         public void Invoke(int PacketID, params JToken[] Data)
         {
-            lock (AckMutex)
+            SimpleMutex.Lock(AckMutex, () =>
             {
                 if (AckList.Count > PacketID && AckList[PacketID] != null)
                 {
@@ -115,18 +120,18 @@ namespace SocketIOSharp.Common.Manager
                         AckList[PacketID] = null;
                     }
                 }
-            }
+            });
         }
 
         public void Remove(int PacketID)
         {
-            lock (AckMutex)
+            SimpleMutex.Lock(AckMutex, () =>
             {
                 if (AckList.Count > PacketID)
                 {
                     AckList[PacketID] = null;
                 }
-            }
+            });
         }
     }
 }

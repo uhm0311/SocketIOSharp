@@ -3,25 +3,15 @@ using System;
 
 namespace SocketIOSharp.Common.Abstract
 {
-    public abstract partial class SocketIO : IDisposable
+    public abstract partial class SocketIO<TChildClass> : IDisposable where TChildClass : SocketIO<TChildClass>
     {
         protected SocketIOAckManager AckManager = new SocketIOAckManager() { AutoRemove = true };
-        public bool UseAckTimeout
+
+        protected SocketIO()
         {
-            get
+            if (!(this is TChildClass))
             {
-                return AckManager?.UseAckTimeout ?? false;
-            }
-            set
-            {
-                if (value)
-                {
-                    AckManager.StartTimer();
-                }
-                else
-                {
-                    AckManager.StopTimer();
-                }
+                throw new ArgumentException(string.Format(@"'{0}' does not match with '{1}'.", GetType().Name, typeof(TChildClass).Name));
             }
         }
 

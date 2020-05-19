@@ -2,14 +2,18 @@
 {
     partial class SocketIOSocket
     {
-        protected override void Emit(string Data)
+        protected override SocketIOSocket Emit(string Data)
         {
             Socket.Send(Data);
+
+            return this;
         }
 
-        protected override void Emit(byte[] RawData)
+        protected override SocketIOSocket Emit(byte[] RawData)
         {
             Socket.Send(RawData);
+
+            return this;
         }
     }
 }

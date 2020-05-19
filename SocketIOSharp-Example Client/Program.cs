@@ -31,12 +31,12 @@ namespace SocketIOSharp.Example.Client
 
         static void InitEventHandlers(SocketIOClient client)
         {
-            client.On(SocketIOEvent.CONNECTION, (Data) =>
+            client.On(SocketIOEvent.CONNECTION, () =>
             {
                 Console.WriteLine("Connected!");
             });
 
-            client.On(SocketIOEvent.DISCONNECT, (Data) =>
+            client.On(SocketIOEvent.DISCONNECT, () =>
             {
                 Console.WriteLine();
                 Console.WriteLine("Disconnected!");

@@ -4,7 +4,7 @@ using SocketIOSharp.Common.Abstract.Connection;
 
 namespace SocketIOSharp.Server.Client
 {
-    public partial class SocketIOSocket : SocketIOConnection
+    public partial class SocketIOSocket : SocketIOConnection<SocketIOSocket>
     {
         private readonly EngineIOSocket Socket;
 
@@ -14,7 +14,6 @@ namespace SocketIOSharp.Server.Client
 
         internal SocketIOSocket(EngineIOSocket Socket, SocketIOServer Server)
         {
-            UseAckTimeout = Server.Option.UseAckTimeout;
             AckManager.SetTimeout(Server.Option.PingTimeout);
 
             Socket.OnMessage(OnPacket);
@@ -24,9 +23,11 @@ namespace SocketIOSharp.Server.Client
             this.Socket = Socket;
         }
 
-        public override void Close()
+        public override SocketIOSocket Close()
         {
             Socket.Close();
+
+            return this;
         }
     }
 }

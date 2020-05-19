@@ -2,14 +2,18 @@
 {
     partial class SocketIOServer
     {
-        protected override void Emit(string Data)
+        protected override SocketIOServer Emit(string Data)
         {
             Server.Broadcast(Data);
+
+            return this;
         }
 
-        protected override void Emit(byte[] RawData)
+        protected override SocketIOServer Emit(byte[] RawData)
         {
             Server.Broadcast(RawData);
+
+            return this;
         }
     }
 }
