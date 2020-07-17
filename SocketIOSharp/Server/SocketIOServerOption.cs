@@ -11,14 +11,11 @@ namespace SocketIOSharp.Server
 {
     public class SocketIOServerOption : EngineIOServerOption
     {
-        public bool UseAckTimeout { get; private set; }
-
         /// <summary>
         /// Options for Socket.IO server.
         /// </summary>
         /// <param name="Port">Port to listen.</param>
         /// <param name="Secure">Whether to secure connections.</param>
-        /// <param name="UseAckTimeout">Whether to use ack timeout or not.</param>
         /// <param name="PingTimeout">How many ms without a pong packet to consider the connection closed.</param>
         /// <param name="PingInterval">How many ms before sending a new ping packet.</param>
         /// <param name="UpgradeTimeout">How many ms before an uncompleted transport upgrade is cancelled.</param>
@@ -35,7 +32,7 @@ namespace SocketIOSharp.Server
         /// <param name="ClientCertificateValidationCallback">Callback used to validate the certificate supplied by the client.</param>
         public SocketIOServerOption(ushort Port, bool Secure = false, bool UseAckTimeout = false, ulong PingTimeout = 5000, ulong PingInterval = 25000, ulong UpgradeTimeout = 10000, bool Polling = true, bool WebSocket = true, bool AllowUpgrade = true, bool SetCookie = true, string SIDCookieName = "io", IDictionary<string, string> Cookies = null, Action<HttpListenerRequest, Action<EngineIOException>> AllowHttpRequest = null, Action<WebSocketContext, Action<EngineIOException>> AllowWebSocket = null, object InitialData = null, X509Certificate2 ServerCertificate = null, RemoteCertificateValidationCallback ClientCertificateValidationCallback = null) : base(Port, "/socket.io", Secure, PingTimeout, PingInterval, UpgradeTimeout, Polling, WebSocket, AllowUpgrade, SetCookie, SIDCookieName, Cookies, AllowHttpRequest, AllowWebSocket, InitialData, ServerCertificate, ClientCertificateValidationCallback)
         {
-            this.UseAckTimeout = UseAckTimeout;
+            
         }
     }
 }
