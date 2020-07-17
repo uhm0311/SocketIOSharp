@@ -199,6 +199,8 @@ SocketIOServer server = new SocketIOServer(new SocketIOServerOption(9001));
   
   - **Optional Parameters**
     
+    - `Path` : Path to listen. Defaults to `"/socket.io"`.
+    
     - `Secure` : Whether to secure connections. Defatuls to `false`.
     
     - `PingTimeout` : How many ms without a pong packet to consider the connection closed. Defatuls to `5000`.
