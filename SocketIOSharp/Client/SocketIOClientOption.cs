@@ -58,7 +58,7 @@ namespace SocketIOSharp.Client
         /// <param name="Port">Port to connect to.</param>
         /// <param name="PolicyPort">Port the policy server listens on.</param>
         /// <param name="Path">Path to connect to.</param>
-        /// <param name="Reconnection">Whether to reconnect to server after Engine.IO client is closed or not.</param>
+        /// <param name="Reconnection">Whether to reconnect to server after Socket.IO client is closed or not.</param>
         /// <param name="ReconnectionAttempts">Number of reconnection attempts before giving up.</param>
         /// <param name="ReconnectionDelay">How ms to initially wait before attempting a new reconnection.</param>
         /// <param name="ReconnectionDelayMax">Maximum amount of time to wait between reconnections. Each attempt increases the <see cref="ReconnectionDelay"/> by 2x along with a randomization.</param>
