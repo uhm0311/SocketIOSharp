@@ -33,9 +33,9 @@ SocketIOClient client = new SocketIOClient(new SocketIOClientOption(EngineIOSche
   
     - `PolicyPort` : Port the policy server listens on. Defaults to `843`.
     
-    - `Path` : Path to connect to. Defaults to `"/engine.io"`.
+    - `Path` : Path to connect to. Defaults to `"/socket.io"`.
     
-    - `Reconnection` : Whether to reconnect to server after Engine.IO client is closed or not.
+    - `Reconnection` : Whether to reconnect to server after Socket.IO client is closed or not.
     
     - `ReconnectionAttempts` : Number of reconnection attempts before giving up.
     
