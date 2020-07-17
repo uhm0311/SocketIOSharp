@@ -15,6 +15,7 @@ namespace SocketIOSharp.Client
 
         private EngineIOClient Client = null;
         private ulong ReconnectionAttempts = 0;
+        private bool Closing = false;
 
         public SocketIOClientOption Option { get; private set; }
 
@@ -30,6 +31,7 @@ namespace SocketIOSharp.Client
             if (Client == null)
             {
                 ReconnectionAttempts = 0;
+                Closing = false;
 
                 void Connect()
                 {
@@ -60,7 +62,7 @@ namespace SocketIOSharp.Client
                             CallEventHandler(Event.RECONNECT_ERROR, new SocketIOException("Reconnect error", Exception).ToString());
                         }
 
-                        if (Option.Reconnection && ReconnectionAttempts < Option.ReconnectionAttempts)
+                        if (!Closing && Option.Reconnection && ReconnectionAttempts < Option.ReconnectionAttempts)
                         {
                             ReconnectionAttempts++;
 
@@ -112,6 +114,7 @@ namespace SocketIOSharp.Client
 
         public override SocketIOClient Close()
         {
+            Closing = true;
             Client?.Close();
 
             return this;

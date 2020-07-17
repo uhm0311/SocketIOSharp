@@ -17,7 +17,7 @@ namespace SocketIOSharp.Server.Client
             AckManager.SetTimeout(Server.Option.PingTimeout);
 
             Socket.OnMessage(OnPacket);
-            Socket.OnClose(OnDisconnect);
+            Socket.OnClose((message, description) => OnDisconnect(description));
 
             this.Server = Server;
             this.Socket = Socket;
