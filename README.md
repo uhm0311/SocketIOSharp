@@ -386,7 +386,6 @@ Welcome to report issue or create pull request. I will check it happily.
 
 # Dependencies
 - [EngineIOSharp v1.0.2](https://github.com/uhm0311/EngineIOSharp)
-- [Newtonsoft.Json v9.0.1](https://github.com/JamesNK/Newtonsoft.Json)
 
 # License
 `SocketIOSharp` is under [The MIT License](https://github.com/uhm0311/SocketIOSharp/blob/master/LICENSE).
