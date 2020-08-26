@@ -1,36 +1,35 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-  <TargetFrameworks Condition="'$(LibraryFrameworks)'==''">net45;net40;netstandard2.0</TargetFrameworks>
-  <TargetFrameworks Condition="'$(LibraryFrameworks)'!=''">$(LibraryFrameworks)</TargetFrameworks>
-  <RootNamespace>SocketIOSharp</RootNamespace>
+    <TargetFrameworks Condition="'$(LibraryFrameworks)'==''">net45;net40;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(LibraryFrameworks)'!=''">$(LibraryFrameworks)</TargetFrameworks>
+    <RootNamespace>SocketIOSharp</RootNamespace>
     <AssemblyName>SocketIOSharp</AssemblyName>
     <FileAlignment>512</FileAlignment>
-  <Authors>uhm0311</Authors>
-  <Company>uhm0311</Company>
-  <Title>Socket.IO</Title>
-  <Copyright>Copyright (c) 2016-2020 uhm0311</Copyright>
-  <Description>C# implementation of Socket.IO protocol client.</Description>
-  <PackageId>SocketIOSharp</PackageId>
+    <Authors>uhm0311</Authors>
+    <Company>uhm0311</Company>
+    <Title>Socket.IO</Title>
+    <Copyright>Copyright (c) 2016-2020 uhm0311</Copyright>
+    <Description>C# implementation of Socket.IO protocol client.</Description>
+    <PackageId>SocketIOSharp</PackageId>
     <PackageTags>Socket.IO;SocketIO</PackageTags>
     <PackageProjectUrl>https://github.com/uhm0311/SocketIOSharp</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-  <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/uhm0311/SocketIOSharp.git</RepositoryUrl>
-  <PackageIcon>icon.png</PackageIcon>
-  <MinClientVersion>2.12</MinClientVersion>
-  <PackageVersion>1.0.2</PackageVersion>
-  <PackageReleaseNotes>Fix bug from critical misunderstanding of ping timeout.</PackageReleaseNotes>
+    <PackageIcon>icon.png</PackageIcon>
+    <MinClientVersion>2.12</MinClientVersion>
+    <PackageVersion>2.0.0</PackageVersion>
+    <PackageReleaseNotes>Add EngineIOSharp dependency.</PackageReleaseNotes>
+    <PackageOutputPath>../nuget</PackageOutputPath>
+    <IncludeSymbols>true</IncludeSymbols>
+    <IncludeSource>true</IncludeSource>
   </PropertyGroup>
-  <ItemGroup Condition="'$(TargetFramework)'=='net45' OR '$(TargetFramework)'=='net40'">
-    <PackageReference Include="WebSocketSharp-NonPreRelease" Version="1.0.0" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)'=='netstandard2.0'">
-    <PackageReference Include="WebSocketSharp-netstandard" Version="1.0.1" />
-  </ItemGroup>
   <ItemGroup>
     <None Include="..\icon.png" Pack="true" PackagePath="\" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="EngineIOSharp" Version="1.0.2" />
   </ItemGroup>
 </Project>

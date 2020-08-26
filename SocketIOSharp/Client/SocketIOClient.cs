@@ -1,107 +1,123 @@
-﻿using SocketIOSharp.Packet.Ack;
+﻿using EngineIOSharp.Client;
+using EngineIOSharp.Common.Enum;
+using EngineIOSharp.Common.Packet;
+using SocketIOSharp.Common;
+using SocketIOSharp.Common.Abstract.Connection;
 using System;
-using WebSocketSharp;
+using System.Threading;
 
 namespace SocketIOSharp.Client
 {
-    public partial class SocketIOClient : IDisposable
+    public partial class SocketIOClient : SocketIOConnection<SocketIOClient>
     {
-        private readonly ConnctionData ConnectionInformation = new ConnctionData();
-        private WebSocket Client = null;
+        private static readonly Random Random = new Random();
+        private DateTime LastPing = DateTime.UtcNow;
 
-        public bool JsonOnly { get; set; }
-        public bool AutoReconnect { get; set; }
+        private EngineIOClient Client = null;
+        private ulong ReconnectionAttempts = 0;
+        private bool Closing = false;
 
-        private SocketIOAckManager AckManager = null;
-        public bool UseAckTimeout 
+        public SocketIOClientOption Option { get; private set; }
+
+        public override EngineIOReadyState ReadyState => Client?.ReadyState ?? EngineIOReadyState.CLOSED;
+
+        public SocketIOClient(SocketIOClientOption Option)
         {
-            get 
+            this.Option = Option;
+        }
+
+        public SocketIOClient Connect()
+        {
+            if (Client == null)
             {
-                if (AckManager != null)
-                    return AckManager.UseAckTimeout;
-                else return false;
+                ReconnectionAttempts = 0;
+                Closing = false;
+
+                void Connect()
+                {
+                    Client = new EngineIOClient(Option);
+                    Client.OnOpen(() =>
+                    {
+                        AckManager.SetTimeout(Client.Handshake.PingTimeout);
+                        AckManager.StartTimer();
+
+                        if (ReconnectionAttempts > 0)
+                        {
+                            CallEventHandler(Event.RECONNECT, ReconnectionAttempts);
+                            ReconnectionAttempts = 0;
+                        }
+                    });
+
+                    Client.OnMessage(OnPacket);
+                    Client.OnClose((Exception) =>
+                    {
+                        OnDisconnect(Exception);
+
+                        if (ReconnectionAttempts == 0)
+                        {
+                            CallEventHandler(Event.CONNECT_ERROR, new SocketIOException("Connect error", Exception).ToString());
+                        }
+                        else
+                        {
+                            CallEventHandler(Event.RECONNECT_ERROR, new SocketIOException("Reconnect error", Exception).ToString());
+                        }
+
+                        if (!Closing && Option.Reconnection && ReconnectionAttempts < Option.ReconnectionAttempts)
+                        {
+                            ReconnectionAttempts++;
+
+                            ThreadPool.QueueUserWorkItem((_) =>
+                            {
+                                int Factor = (int)(Option.ReconnectionDelay * Option.RandomizationFactor);
+                                int Delay = Random.Next(Option.ReconnectionDelay - Factor, Option.ReconnectionDelay + Factor + 1);
+
+                                Thread.Sleep(Delay);
+                                Option.ReconnectionDelay = Math.Min(Option.ReconnectionDelayMax, Option.ReconnectionDelay * 2);
+
+                                CallEventHandler(Event.RECONNECT_ATTEMPT);
+                                Connect();
+
+                                CallEventHandler(Event.RECONNECTING, ReconnectionAttempts);
+                            });
+                        }
+                        else if (ReconnectionAttempts >= Option.ReconnectionAttempts)
+                        {
+                            CallEventHandler(Event.RECONNECT_FAILED);
+                        }
+                    });
+
+                    Client.On(EngineIOClient.Event.PACKET_CREATE, (Argument) =>
+                    {
+                        if ((Argument as EngineIOPacket).Type == EngineIOPacketType.PING)
+                        {
+                            CallEventHandler(Event.PING);
+                            LastPing = DateTime.UtcNow;
+                        }
+                    });
+
+                    Client.On(EngineIOClient.Event.PACKET, (Argument) =>
+                    {
+                        if ((Argument as EngineIOPacket).Type == EngineIOPacketType.PONG)
+                        {
+                            CallEventHandler(Event.PONG, DateTime.UtcNow.Subtract(LastPing).TotalMilliseconds);
+                        }
+                    });
+
+                    Client.Connect();
+                }
+
+                Connect();
             }
-            set 
-            {
-                if (AckManager == null)
-                    AckManager = new SocketIOAckManager() { AutoRemove = true };
 
-                if (value)
-                    AckManager.StartTimer();
-                else AckManager.StopTimer();
-            }
+            return this;
         }
 
-        public SocketIOClient(SocketIOClient.Scheme Scheme, string Host, int Port, bool JsonOnly = false, bool AutoReconnect = false, bool UseAckTimeout = false)
+        public override SocketIOClient Close()
         {
-            Initialize(Scheme, Host, Port, JsonOnly, AutoReconnect, UseAckTimeout);
-        }
+            Closing = true;
+            Client?.Close();
 
-        private void Initialize(SocketIOClient.Scheme Scheme, string Host, int Port, bool JsonOnly, bool AutoReconnect, bool UseAckTimeout)
-        {
-            string URIString = string.Format("{0}://{1}:{2}/socket.io/?EIO=4&transport=websocket", Scheme, Host, Port);
-
-            this.Client = new WebSocket(URIString);
-
-            this.Client.OnOpen += OnWebsocketOpen;
-            this.Client.OnClose += OnWebsocketClose;
-            this.Client.OnMessage += OnWebsocketMessage;
-            this.Client.OnError += OnWebsocketError;
-
-            this.ConnectionInformation.Scheme = Scheme;
-            this.ConnectionInformation.Host = Host;
-            this.ConnectionInformation.Port = Port;
-
-            this.JsonOnly = JsonOnly;
-            this.AutoReconnect = AutoReconnect;
-            this.UseAckTimeout = UseAckTimeout;
-        }
-
-        public void Connect()
-        {
-            if (this.Client == null)
-                Initialize(this.ConnectionInformation.Scheme, this.ConnectionInformation.Host, this.ConnectionInformation.Port, this.JsonOnly, this.AutoReconnect, this.UseAckTimeout);
-            this.Client.Connect();
-        }
-
-        public void Close()
-        {
-            if (this.Client != null && this.Client.IsAlive)
-            {
-                this.Client.Close();
-                this.Client = null;
-            }
-
-            if (this.AckManager != null)
-            {
-                this.AckManager.Dispose();
-                this.AckManager = null;
-            }
-
-            this.StopHeartbeatTimers();
-            this.Reconstructor.Dispose();
-        }
-
-        public void Dispose()
-        {
-            this.Close();
-        }
-
-        public enum Scheme
-        {
-            ws,
-            wss,
-        };
-
-        private class ConnctionData
-        {
-            internal SocketIOClient.Scheme Scheme = Scheme.ws;
-            internal string Host = string.Empty;
-            internal int Port = 0;
-
-            internal string SocketID = string.Empty;
-            internal int PingInterval = 0;
-            internal int PingTimeout = 0;
+            return this;
         }
     }
 }
