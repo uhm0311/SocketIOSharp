@@ -20,8 +20,8 @@
     <RepositoryUrl>https://github.com/uhm0311/SocketIOSharp.git</RepositoryUrl>
     <PackageIcon>icon.png</PackageIcon>
     <MinClientVersion>2.12</MinClientVersion>
-    <PackageVersion>1.0.2</PackageVersion>
-    <PackageReleaseNotes>Fix bug from critical misunderstanding of ping timeout.</PackageReleaseNotes>
+    <PackageVersion>2.0.0</PackageVersion>
+    <PackageReleaseNotes>Add EngineIOSharp dependency.</PackageReleaseNotes>
     <PackageOutputPath>../nuget</PackageOutputPath>
     <IncludeSymbols>true</IncludeSymbols>
     <IncludeSource>true</IncludeSource>
