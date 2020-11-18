@@ -20,7 +20,7 @@
     <RepositoryUrl>https://github.com/uhm0311/SocketIOSharp.git</RepositoryUrl>
     <PackageIcon>icon.png</PackageIcon>
     <MinClientVersion>2.12</MinClientVersion>
-    <PackageVersion>2.0.1</PackageVersion>
+    <PackageVersion>2.0.2</PackageVersion>
     <PackageReleaseNotes>Update EngineIOSharp dependency.</PackageReleaseNotes>
     <PackageOutputPath>../nuget</PackageOutputPath>
     <IncludeSymbols>true</IncludeSymbols>
@@ -30,6 +30,6 @@
     <None Include="..\icon.png" Pack="true" PackagePath="\" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="EngineIOSharp" Version="1.0.3" />
+    <PackageReference Include="EngineIOSharp" Version="1.0.4" />
   </ItemGroup>
 </Project>
