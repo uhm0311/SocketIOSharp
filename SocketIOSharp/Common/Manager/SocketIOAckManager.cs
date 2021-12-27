@@ -87,6 +87,7 @@ namespace SocketIOSharp.Common.Manager
                             if (AckList[i] == null)
                             {
                                 Result = AckList[i] = new SocketIOAck(i, Callback);
+                                break;
                             }
                         }
                         else
@@ -95,6 +96,7 @@ namespace SocketIOSharp.Common.Manager
                             AckList.Add(Ack);
 
                             Result = Ack;
+                            break;
                         }
                     }
                 });
