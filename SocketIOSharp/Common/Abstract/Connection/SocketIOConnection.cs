@@ -28,7 +28,7 @@ namespace SocketIOSharp.Common.Abstract.Connection
             switch (Packet.Type)
             {
                 case SocketIOPacketType.CONNECT:
-                    OnConnect();
+                    OnConnect(Packet);
                     break;
 
                 case SocketIOPacketType.DISCONNECT:
@@ -61,9 +61,11 @@ namespace SocketIOSharp.Common.Abstract.Connection
             }
         }
 
-        private void OnConnect()
+        private void OnConnect(SocketIOPacket Packet)
         {
-            CallEventHandler(SocketIOEvent.CONNECTION);
+            CallEventHandler(SocketIOEvent.CONNECTION, Packet.Namespace);
+            
+            Emit(SocketIOPacket.CreateConnectionPacket(Packet.Namespace));
         }
 
         protected void OnDisconnect(Exception Exception)
@@ -89,7 +91,7 @@ namespace SocketIOSharp.Common.Abstract.Connection
 
         private void OnError(SocketIOPacket Packet)
         {
-            CallEventHandler(SocketIOEvent.ERROR, Packet?.JsonData?.ToString() ?? string.Empty);
+            CallEventHandler(SocketIOEvent.ERROR, Packet.Namespace, Packet?.JsonData?.ToString() ?? string.Empty);
         }
 
         private void OnBinaryEvent(SocketIOPacket Packet)
