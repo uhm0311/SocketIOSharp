@@ -81,28 +81,31 @@ namespace SocketIOSharp.Common.Packet
                     Packet.Namespace = "/";
                 }
 
-                char Next = Data[Offset + 1];
-
-                if (!char.IsWhiteSpace(Next) && char.IsNumber(Next))
+                if (Offset < Data.Length - 1)
                 {
-                    StringBuilder Builder = new StringBuilder();
+                    char Next = Data[Offset + 1];
 
-                    while (Offset < Data.Length - 1)
+                    if (!char.IsWhiteSpace(Next) && char.IsNumber(Next))
                     {
-                        char c = Data[++Offset];
+                        StringBuilder Builder = new StringBuilder();
 
-                        if (char.IsNumber(c))
+                        while (Offset < Data.Length - 1)
                         {
-                            Builder.Append(c);
+                            char c = Data[++Offset];
+
+                            if (char.IsNumber(c))
+                            {
+                                Builder.Append(c);
+                            }
+                            else
+                            {
+                                --Offset;
+                                break;
+                            }
                         }
-                        else
-                        {
-                            --Offset;
-                            break;
-                        }
+
+                        Packet.ID = int.Parse(Builder.ToString());
                     }
-
-                    Packet.ID = int.Parse(Builder.ToString());
                 }
 
                 if (++Offset < Data.Length - 1)

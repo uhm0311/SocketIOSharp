@@ -25,17 +25,17 @@ namespace SocketIOSharp.Common.Abstract
             return Result;
         }
 
-        public TChildClass Emit(JToken Event, Action<JToken[]> Callback = null)
+        public TChildClass Emit(JToken Event, string ns = "/", Action<JToken[]> Callback = null)
         {
-            return Emit(Event, Arguments(Callback));
+            return Emit(Event, ns, Arguments(Callback));
         }
 
-        public TChildClass Emit(JToken Event, JToken Data, Action<JToken[]> Callback = null)
+        public TChildClass Emit(JToken Event, JToken Data,  string ns = "/", Action<JToken[]> Callback = null)
         {
-            return Emit(Event, Arguments(Data, Callback));
+            return Emit(Event, ns, Arguments(Data, Callback));
         }
 
-        public TChildClass Emit(JToken Event, params object[] Arguments)
+        private TChildClass Emit(JToken Event, string ns, params object[] Arguments)
         {
             if (Event != null)
             {
@@ -61,7 +61,7 @@ namespace SocketIOSharp.Common.Abstract
                     JsonArray.Add(Data);
                 }
 
-                Emit(SocketIOPacket.CreateEventPacket(JsonArray, AckManager.CreateAck(Callback)));
+                Emit(SocketIOPacket.CreateEventPacket(JsonArray, AckManager.CreateAck(Callback), ns));
             }
 
             return this as TChildClass;

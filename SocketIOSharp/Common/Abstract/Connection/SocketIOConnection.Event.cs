@@ -88,14 +88,14 @@ namespace SocketIOSharp.Common.Abstract.Connection
                 {
                     JToken Event = Temp.Dequeue();
                     JToken[] Data = Temp.ToArray();
-
-                    CallEventHandler(Event, Data);
-                    CallAckEventHandler(Event, Packet.ID, Data);
+                    Temp.Enqueue(Packet.Namespace);
+                    CallEventHandler(Event, Temp.ToArray());
+                    CallAckEventHandler(Event, Packet.ID, Packet.Namespace, Data);
                 }
             }
         }
 
-        private void CallAckEventHandler(JToken Event, int PacketID, params JToken[] Data)
+        private void CallAckEventHandler(JToken Event, int PacketID, string ns, params JToken[] Data)
         {
             if (Event != null)
             {
@@ -105,7 +105,7 @@ namespace SocketIOSharp.Common.Abstract.Connection
                 {
                     Callback = (AckData) =>
                     {
-                        Emit(SocketIOPacket.CreateAckPacket(new JArray(AckData), PacketID));
+                        Emit(SocketIOPacket.CreateAckPacket(new JArray(AckData), PacketID, ns));
                     };
                 }
 

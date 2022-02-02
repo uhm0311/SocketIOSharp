@@ -5,18 +5,19 @@ namespace SocketIOSharp.Common.Packet
 {
     partial class SocketIOPacket
     {
-        internal static SocketIOPacket CreateConnectionPacket()
+        internal static SocketIOPacket CreateConnectionPacket(string ns = "/")
         {
             return new SocketIOPacket()
             {
                 Type = SocketIOPacketType.CONNECT,
-                IsJson = true
+                IsJson = true,
+                Namespace = ns
             };
         }
 
-        internal static SocketIOPacket CreateEventPacket(JArray JsonArray, SocketIOAck Ack)
+        internal static SocketIOPacket CreateEventPacket(JArray JsonArray, SocketIOAck Ack, string ns)
         {
-            SocketIOPacket Packet = CreateMessagePacket(JsonArray, Ack);
+            SocketIOPacket Packet = CreateMessagePacket(JsonArray, Ack, ns);
 
             if (Packet.IsJson)
             {
@@ -31,11 +32,11 @@ namespace SocketIOSharp.Common.Packet
             return Packet;
         }
 
-        internal static SocketIOPacket CreateAckPacket(JArray JsonArray, int PacketID)
+        internal static SocketIOPacket CreateAckPacket(JArray JsonArray, int PacketID, string ns = "/")
         {
             if (PacketID >= 0)
             {
-                SocketIOPacket Packet = CreateMessagePacket(JsonArray, PacketID);
+                SocketIOPacket Packet = CreateMessagePacket(JsonArray, PacketID, ns);
 
                 if (Packet.IsJson)
                 {
@@ -55,17 +56,18 @@ namespace SocketIOSharp.Common.Packet
             }
         }
 
-        private static SocketIOPacket CreateMessagePacket(JArray JsonArray, SocketIOAck Ack)
+        private static SocketIOPacket CreateMessagePacket(JArray JsonArray, SocketIOAck Ack, string ns)
         {
-            return CreateMessagePacket(JsonArray, Ack == null ? -1 : Ack.PacketID);
+            return CreateMessagePacket(JsonArray, Ack == null ? -1 : Ack.PacketID, ns);
         }
 
-        private static SocketIOPacket CreateMessagePacket(JArray JsonArray, int PacketID)
+        private static SocketIOPacket CreateMessagePacket(JArray JsonArray, int PacketID, string ns)
         {
             SocketIOPacket Packet = new SocketIOPacket
             {
                 JsonData = JsonArray,
-                IsJson = true
+                IsJson = true,
+                Namespace = ns
             };
 
             if (PacketID >= 0)
